@@ -1,5 +1,14 @@
 package model;
 
 public enum State {
-    NONE, RED, BLUE, INVALID
+    NONE(false),
+    RED(true),
+    BLUE(true),
+    INVALID(false);
+
+    final boolean isColored;
+
+    private State(boolean colored){
+        isColored = colored;
+    }
 }

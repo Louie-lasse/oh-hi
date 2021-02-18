@@ -3,6 +3,6 @@ package model;
 public interface IModel {
     void update();
     void createWorld(int size);
-    void changeCell(Position position);
+    void nextState(Position position);
     boolean isCompleted();
 }

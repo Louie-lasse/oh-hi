@@ -13,23 +13,32 @@ public class Cell implements ICell{
 
     public void nextState(){
         switch (state.ordinal()) {
-            case (0) -> setRed();
-            case (1) -> setBlue();
+            case (0) -> setColor(State.RED);
+            case (1) -> setColor(State.BLUE);
             case (3) -> makeNull();
         }
     }
 
+    @Override
+    public boolean equals(Object c){
+        if (c == this) return true;
+        if (!(c instanceof Cell)) return false;
+        Cell other = (Cell) c;
+        return other.getState().equals(this.getState());
+    }
 
     public void makeNull(){
         state = State.NONE;
     }
 
-    public void setRed() { state = State.RED; }
+    public void setColor(State color) {
+        if (color.isColored) {
+            this.state = color;
+        }
+    }
 
-    public void setBlue() { state = State.BLUE; }
-
-    public State getState(){return
-            state;
+    public State getState(){
+        return state;
     }
 
     public boolean isFilled(){
