@@ -11,4 +11,5 @@ public enum State {
     State(boolean colored){
         isColored = colored;
     }
+
 }

@@ -21,4 +21,8 @@ public class Proof {
     State getColor(){
         return color;
     }
+
+    boolean isColored(){
+        return color.isColored;
+    }
 }

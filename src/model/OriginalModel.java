@@ -56,10 +56,12 @@ public class OriginalModel implements IModel{
                     continue;
                 }
                 proof = getProof(row, col);
-                world[row][col].setColor(proof.getColor());
-                row = 0;
-                col = 0;
-                filledCells++;
+                if (proof.isColored()){
+                    world[row][col].setColor(proof.getColor());
+                    row = 0;
+                    col = 0;
+                    filledCells++;
+                }
             }
         }
         return filledCells;
