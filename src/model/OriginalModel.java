@@ -1,9 +1,5 @@
 package model;
 
-import javafx.geometry.Pos;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 public class OriginalModel implements IModel{
@@ -13,6 +9,9 @@ public class OriginalModel implements IModel{
     private int size;
 
     private boolean completed;
+
+    public OriginalModel() {
+    }
 
     public void update(){}
 
@@ -172,9 +171,60 @@ public class OriginalModel implements IModel{
         return State.NONE;
     }
 
-    private Proof provableOnRow(Position position){return new Proof();}
+    private Proof provableOnRow(Position position){
+        Proof proof = new Proof();
+        int blueCount = countOnRow(position.row, State.BLUE);
+        int redCount = countOnRow(position.row, State.RED);
+        if (blueCount + 1 >= size/2){
+            proof.add(State.BLUE);
+        }
+        if (redCount +1 >= size/2){
+            proof.add(State.RED);
+        }
+        return proof;
+    }
 
-    private Proof provableOnCol(Position position){return new Proof();}
+    private int countOnRow(int row, State color){
+        int count = 0;
+        for (ICell cell: world[row]){
+            if (cell.getState().equals(color)) count++;
+        }
+        return count;
+    }
+
+
+    private Proof provableOnCol(Position position){
+        Proof proof = new Proof();
+        int blueCount = countOnColumn(position.row, State.BLUE);
+        int redCount = countOnColumn(position.row, State.RED);
+        if (blueCount + 1 >= size/2){
+            proof.add(State.BLUE);
+        }
+        if (redCount +1 >= size/2){
+            proof.add(State.RED);
+        }
+        return proof;    }
+
+    private Proof countOnColumn(Position position){
+        Proof proof = new Proof();
+        int blueCount = countOnColumn(position.column, State.BLUE);
+        int redCount = countOnColumn(position.column, State.RED);
+        if (blueCount + 1 >= size/2){
+            proof.add(State.BLUE);
+        }
+        if (redCount +1 >= size/2){
+            proof.add(State.RED);
+        }
+        return proof;
+    }
+
+    private int countOnColumn(int col, State color){
+        int count = 0;
+        for (ICell[] cell: world){
+            if (cell[col].getState().equals(color)) count++;
+        }
+        return count;
+    }
 
     private Proof provableBySameRow(Position position){return new Proof();}
 

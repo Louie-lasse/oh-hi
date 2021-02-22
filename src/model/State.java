@@ -8,7 +8,7 @@ public enum State {
 
     final boolean isColored;
 
-    private State(boolean colored){
+    State(boolean colored){
         isColored = colored;
     }
 }
