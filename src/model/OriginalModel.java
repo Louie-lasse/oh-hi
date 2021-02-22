@@ -20,6 +20,7 @@ public class OriginalModel implements IModel{
     public void createWorld(int size){
         this.size = size;
         world = new Cell[size][size];
+        fillWorld();
         int filledCells = 0;
         boolean lookForProvenCells = true;
         while (filledCells < size*size){
@@ -29,6 +30,14 @@ public class OriginalModel implements IModel{
                 filledCells += fillRandomCell();
             }
             lookForProvenCells = !lookForProvenCells;
+        }
+    }
+
+    private void fillWorld(){
+        for (ICell[] row: world){
+            for (int col = 0; col < size; col++){
+                row[col] = new Cell();
+            }
         }
     }
 
