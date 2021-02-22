@@ -9,7 +9,7 @@ public class Proof {
         if (color.equals(State.NONE)){
             color = state;
         }
-        if (!color.equals(state)){
+        if (!state.equals(State.NONE) && !color.equals(state)){
             color = State.INVALID;
         }
     }

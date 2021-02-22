@@ -5,4 +5,5 @@ public interface IModel {
     void createWorld(int size);
     void nextState(Position position);
     boolean isCompleted();
+    ICell[][] getWorld();
 }

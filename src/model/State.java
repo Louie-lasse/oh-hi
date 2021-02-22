@@ -12,4 +12,9 @@ public enum State {
         isColored = colored;
     }
 
+    public State inverse(){
+        if (!this.isColored) return this;
+        if (this==RED) return BLUE;
+        return RED;
+    }
 }

@@ -1,5 +1,9 @@
 package model;
 
+import Application.Main;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class OriginalModel implements IModel{
@@ -10,19 +14,22 @@ public class OriginalModel implements IModel{
 
     private boolean completed;
 
-    public OriginalModel() {
-    }
+    public OriginalModel() {}
 
     public void update(){}
+
+    public ICell[][] getWorld(){
+        return world;
+    }
 
     private final Random random = new Random();
 
     public void createWorld(int size){
         this.size = size;
         world = new Cell[size][size];
-        fillWorld();
+        fillWorldWithEmptyCells();
         int filledCells = 0;
-        boolean lookForProvenCells = true;
+        boolean lookForProvenCells = false;
         while (filledCells < size*size){
             if (lookForProvenCells) {
                 filledCells += fillAllProvenCells();
@@ -33,7 +40,7 @@ public class OriginalModel implements IModel{
         }
     }
 
-    private void fillWorld(){
+    private void fillWorldWithEmptyCells(){
         for (ICell[] row: world){
             for (int col = 0; col < size; col++){
                 row[col] = new Cell();
@@ -42,6 +49,7 @@ public class OriginalModel implements IModel{
     }
 
     private int fillRandomCell(){
+        //FIXME Is it less random if the position is not random?
         int row = 0;
         int col = 0;
         while (world[row][col].isFilled()){
@@ -89,105 +97,79 @@ public class OriginalModel implements IModel{
         return world[position.row][position.column];
     }
 
-    private Proof getProof(Position position){
-        Proof p = new Proof();
-        p.add(provableByNeighbour(position));
-        p.add(provableOnRow(position));
-        p.add(provableOnCol(position));
-        p.add(provableBySameRow(position));
-        p.add(provableByOddOneOut(position));
-        return p;
+    private Proof getProof(int row, int column){
+        Proof proof = new Proof();
+        proof.add(provableByNeighbour(row, column));
+        proof.add(provableOnRow(row, column));
+        //proof.add(provableOnCol(position));
+        //proof.add(provableBySameRow(position));
+        //proof.add(provableByOddOneOut(position));
+        return proof;
     }
 
-    private Proof getProof(int row, int col){
-        return getProof(new Position(row, col));
-    }
-    //TODO Vastly simplify
-    //getting the 4 cells in a List, and checking if 2 or more of them are the same color
-    // (if 2 & 2, add RED and BLUE for INVALID)
-    private Proof provableByNeighbour(Position position){
+    //simplification of provableByNeighbour
+    private Proof provableByNeighbour(int row, int column){
         Proof proof = new Proof();
-        if (position.row >= 2){
-            proof.add(readNeighbourAbove(position));
+        List<ICell> cellsOnRow = getNeighboursOnRow(row, column);
+        List<ICell> cellsOnColumn = getNeighboursOnColumn(row, column);
+        proof.add(findNeighbourProof(cellsOnRow));
+        proof.add(findNeighbourProof(cellsOnColumn));
+        return proof;
+    }
+
+    private List<ICell> getNeighboursOnRow(int row, int column){
+        List<ICell> cells = new ArrayList<>();
+        if (column-2 >= 0){
+            cells.add(world[row][column-2]);
         }
-        if (position.row > 0 && position.row < size-1){
-            proof.add(readOnHeight(position));
+        if (column-1 >= 0){
+            cells.add(world[row][column-1]);
         }
-        if (position.row < size-2){
-            proof.add(readNeighbourBelow(position));
+        if (column+1 < size){
+            cells.add(world[row][column+1]);
         }
-        if (position.column >=2){
-            proof.add(readNeighbourLeft(position));
+        if (column+2 < size){
+            cells.add(world[row][column+2]);
         }
-        if (position.column > 0 && position.column < size - 1){
-            proof.add(readOnWidth(position));
+        return cells;
+    }
+
+    private List<ICell> getNeighboursOnColumn(int row, int column){
+        List<ICell> cells = new ArrayList<>();
+        if (row >= 2){
+            cells.add(world[row-2][column]);
         }
-        if (position.column < size -2){
-            proof.add(readNeighbourRight(position));
+        if (row >= 1){
+            cells.add(world[row-1][column]);
+        }
+        if (row+1 < size){
+            cells.add(world[row+1][column]);
+        }
+        if (row+2 < size){
+            cells.add(world[row+2][column]);
+        }
+        return cells;
+    }
+
+    private Proof findNeighbourProof(List<ICell> cells){
+        Proof proof = new Proof();
+        ICell previous = new Cell();
+        for (ICell cell: cells){
+            if (cell.equals(previous)){
+                proof.add(cell.getState().inverse());
+            }
+            previous = cell;
         }
         return proof;
     }
 
-    State readNeighbourAbove(Position position){
-        ICell cellAbove1 = world[position.row-1][position.column];
-        ICell cellAbove2 = world[position.row-2][position.column];
-        if (cellAbove1.equals(cellAbove2)){
-            return cellAbove1.getState();
-        }
-        return State.NONE;
-    }
-
-    State readOnHeight(Position position){
-        ICell cellAbove = world[position.row-1][position.column];
-        ICell cellBelow = world[position.row+1][position.column];
-        if (cellAbove.equals(cellBelow)){
-            return cellAbove.getState();
-        }
-        return State.NONE;
-    }
-
-    State readNeighbourBelow(Position position){
-        ICell cellBelow1 = world[position.row+1][position.column];
-        ICell cellBelow2 = world[position.row+2][position.column];
-        if (cellBelow1.equals(cellBelow2)){
-            return cellBelow1.getState();
-        }
-        return State.NONE;
-    }
-
-    State readNeighbourLeft(Position position){
-        ICell cellLeft1 = world[position.row][position.column-1];
-        ICell cellBLeft2 = world[position.row][position.column-2];
-        if (cellLeft1.equals(cellBLeft2)){
-            return cellLeft1.getState();
-        }
-        return State.NONE;
-    }
-
-    State readOnWidth(Position position){
-        ICell cellLeft = world[position.row][position.column-1];
-        ICell cellRight = world[position.row][position.column+1];
-        if (cellLeft.equals(cellRight)){
-            return cellLeft.getState();
-        }
-        return State.NONE;
-    }
-
-    State readNeighbourRight(Position position){
-        ICell cellRight1 = world[position.row+1][position.column];
-        ICell cellRight2 = world[position.row+2][position.column];
-        if (cellRight1.equals(cellRight2)){
-            return cellRight1.getState();
-        }
-        return State.NONE;
-    }
-
-    private Proof provableOnRow(Position position){
+    //TODO det här ser wack ut
+    private Proof provableOnRow(int row, int column){
         Proof proof = new Proof();
-        int blueCount = countOnRow(position.row, State.BLUE);
-        int redCount = countOnRow(position.row, State.RED);
+        int blueCount = countOnRow(row, State.BLUE);
+        int redCount = countOnRow(row, State.RED);
         if (blueCount + 1 >= size/2){
-            proof.add(State.BLUE);
+            proof.add(State.BLUE); //är detta verkligen rätt
         }
         if (redCount +1 >= size/2){
             proof.add(State.RED);
