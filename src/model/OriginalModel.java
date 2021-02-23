@@ -246,7 +246,7 @@ public class OriginalModel implements IModel{
         List<ICell> provenCells = new ArrayList<>();
         for (int row = 0; row < size; row++){
             for (int col = 0; col < size; col++){
-                if (isProven(row, col)){
+                if (isProven(row, col) && world[row][col].isFilled()){
                     provenCells.add(world[row][col]);
                 }
             }
