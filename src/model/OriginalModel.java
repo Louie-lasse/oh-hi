@@ -26,6 +26,7 @@ public class OriginalModel implements IModel{
         this.size = size;
         world = new Cell[size][size];
         fillWorldWithColoredCells();
+        removeAllRemovableCells();
     }
 
     private void fillWorldWithColoredCells(){
@@ -118,8 +119,8 @@ public class OriginalModel implements IModel{
     private Proof getProof(int row, int column){
         Proof proof = new Proof();
         proof.add(provableByNeighbour(row, column));
-        proof.add(provableOnRow(row, column));
-        proof.add(provableOnCol(row, column));
+        //proof.add(provableOnRow(row, column));
+        //proof.add(provableOnCol(row, column));
         //proof.add(provableBySameRow(position));
         //proof.add(provableByOddOneOut(position));
         return proof;

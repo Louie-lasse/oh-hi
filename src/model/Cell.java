@@ -44,4 +44,9 @@ public class Cell implements ICell{
     public boolean isFilled(){
         return !state.equals(State.NONE);
     }
+
+    @Override
+    public String toString(){
+        return state.toString();
+    }
 }
