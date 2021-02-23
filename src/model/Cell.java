@@ -15,7 +15,7 @@ public class Cell implements ICell{
         switch (state.ordinal()) {
             case (0) -> setColor(State.RED);
             case (1) -> setColor(State.BLUE);
-            case (3) -> makeNull();
+            case (3) -> makeEmpty();
         }
     }
 
@@ -27,7 +27,7 @@ public class Cell implements ICell{
         return other.getState().equals(this.getState());
     }
 
-    public void makeNull(){
+    public void makeEmpty(){
         state = State.NONE;
     }
 

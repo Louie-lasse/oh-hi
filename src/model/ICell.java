@@ -2,7 +2,7 @@ package model;
 
 public interface ICell {
     void nextState();
-    void makeNull();
+    void makeEmpty();
     void setColor(State color);
     State getState();
     boolean isFilled();

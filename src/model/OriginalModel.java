@@ -1,7 +1,5 @@
 package model;
 
-import Application.Main;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -27,17 +25,12 @@ public class OriginalModel implements IModel{
     public void createWorld(int size){
         this.size = size;
         world = new Cell[size][size];
+        fillWorldWithColoredCells();
+    }
+
+    private void fillWorldWithColoredCells(){
         fillWorldWithEmptyCells();
-        int filledCells = 0;
-        boolean lookForProvenCells = false;
-        while (filledCells < size*size){
-            if (lookForProvenCells) {
-                filledCells += fillAllProvenCells();
-            } else {
-                filledCells += fillRandomCell();
-            }
-            lookForProvenCells = !lookForProvenCells;
-        }
+        colorAllCellsInWorld();
     }
 
     private void fillWorldWithEmptyCells(){
@@ -47,6 +40,20 @@ public class OriginalModel implements IModel{
             }
         }
     }
+
+    private void colorAllCellsInWorld() {
+        int filledCells = 0;
+        boolean lookForProvenCells = false;
+        while (filledCells < size * size){
+            if (lookForProvenCells) {
+                filledCells += fillAllProvenCells();
+            } else {
+                filledCells += fillRandomCell();
+            }
+            lookForProvenCells = !lookForProvenCells;
+        }
+    }
+
 
     private int fillRandomCell(){
         //FIXME Is it less random if the position is not random?
@@ -84,6 +91,17 @@ public class OriginalModel implements IModel{
         return filledCells;
     }
 
+    private void removeAllRemovableCells(){
+        List<ICell> provenCells;
+        ICell cell;
+        while (true){
+            provenCells = getAllProvenCells();
+            if (provenCells.size() == 0) break;
+            cell = getRandom(provenCells);
+            cell.makeEmpty();
+        }
+    }
+
     public boolean isCompleted(){
         return completed;
     }
@@ -101,7 +119,7 @@ public class OriginalModel implements IModel{
         Proof proof = new Proof();
         proof.add(provableByNeighbour(row, column));
         proof.add(provableOnRow(row, column));
-        //proof.add(provableOnCol(position));
+        proof.add(provableOnCol(row, column));
         //proof.add(provableBySameRow(position));
         //proof.add(provableByOddOneOut(position));
         return proof;
@@ -186,10 +204,10 @@ public class OriginalModel implements IModel{
     }
 
 
-    private Proof provableOnCol(Position position){
+    private Proof provableOnCol(int row, int column){
         Proof proof = new Proof();
-        int blueCount = countOnColumn(position.row, State.BLUE);
-        int redCount = countOnColumn(position.row, State.RED);
+        int blueCount = countOnColumn(row, State.BLUE);
+        int redCount = countOnColumn(row, State.RED);
         if (blueCount + 1 >= size/2){
             proof.add(State.BLUE);
         }
@@ -223,6 +241,26 @@ public class OriginalModel implements IModel{
 
     private Proof provableByOddOneOut(Position position){return new Proof();}
 
-    private void removeCell(Position position){}
+    private List<ICell> getAllProvenCells(){
+        List<ICell> provenCells = new ArrayList<>();
+        for (int row = 0; row < size; row++){
+            for (int col = 0; col < size; col++){
+                if (isProven(row, col)){
+                    provenCells.add(world[row][col]);
+                }
+            }
+        }
+        return provenCells;
+    }
+
+    private boolean isProven(int row, int col){
+        return getProof(row, col).isColored();
+    }
+
+    private ICell getRandom(List<ICell> cells){
+        int randomIndex = random.nextInt( cells.size() );
+        return cells.get(randomIndex);
+    }
+
 
 }
