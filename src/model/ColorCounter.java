@@ -13,6 +13,12 @@ class ColorCounter {
         add(cell.getState());
     }
 
+    void add(ICell[] cells){
+        for (ICell cell: cells){
+            add(cell);
+        }
+    }
+
     Proof getMissingColor(int size){
         Proof proof = new Proof();
         proof.add(lookForMissingRed(size));
@@ -21,6 +27,7 @@ class ColorCounter {
     }
 
     State lookForMissingRed(int size){
+        //TODO amount < size is incorrect and probably redundant
         if (redAmount < size && blueAmount == size/2) {
             return State.RED;
         }
@@ -32,5 +39,16 @@ class ColorCounter {
             return State.BLUE;
         }
         return State.NONE;
+    }
+
+    Proof getOddOneOut(int size){
+        Proof oddOneOut = new Proof();
+        if (redAmount + 1 == size){
+            oddOneOut.add(State.RED);
+        }
+        if (blueAmount + 1 == size){
+            oddOneOut.add(State.BLUE);
+        }
+        return oddOneOut;
     }
 }

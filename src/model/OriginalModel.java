@@ -206,16 +206,18 @@ public class OriginalModel implements IModel{
 
     private Proof proofByAmountInRow(int row, int column){
         Proof proof = new Proof();
-        List<ICell> cellsOnRow = collectOtherCellsOnRow(row, column);
+        ICell[] cellsOnRow = collectOtherCellsOnRow(row, column);
         proof.add(lookForMissingColor(cellsOnRow));
+        proof.add(lookForSpecialCase(cellsOnRow));
         return proof;
     }
 
-    private List<ICell> collectOtherCellsOnRow(int row, int columnToExclude){
-        List<ICell> cellsOnRow = new ArrayList<>();
-        for (int column = 0; column < size; column++){
-            if (column != columnToExclude){
-                cellsOnRow.add(world[row][column]);
+    private ICell[] collectOtherCellsOnRow(int row, int columnToExclude) {
+        ICell[] cellsOnRow = new ICell[size - 1];
+        int arrayIndex = 0;
+        for (int column = 0; column < size; column++) {
+            if (column != columnToExclude) {
+                cellsOnRow[arrayIndex++] = (world[row][column]);
             }
         }
         return cellsOnRow;
@@ -223,27 +225,49 @@ public class OriginalModel implements IModel{
 
     private Proof proofByAmountInColumn(int row, int column){
         Proof proof = new Proof();
-        List<ICell> cellsOnColumn = collectOtherCellsOnColumn(row, column);
+        ICell[] cellsOnColumn = collectOtherCellsOnColumn(row, column);
         proof.add(lookForMissingColor(cellsOnColumn));
+        proof.add(lookForSpecialCase(cellsOnColumn));
         return proof;
     }
 
-    private List<ICell> collectOtherCellsOnColumn(int rowToExclude, int column){
-        List<ICell> cellsOnColumn = new ArrayList<>();
+    private ICell[] collectOtherCellsOnColumn(int rowToExclude, int column){
+        ICell[] cellsOnColumn = new ICell[size-1];
+        int arrayIndex = 0;
         for (int row = 0; row < size; row++){
             if (row != rowToExclude){
-                cellsOnColumn.add(world[row][column]);
+                cellsOnColumn[arrayIndex++] = (world[row][column]);
             }
         }
         return cellsOnColumn;
     }
 
-    private Proof lookForMissingColor(List<ICell> cells){
+    private Proof lookForMissingColor(ICell[] cells){
         ColorCounter counter = new ColorCounter();
-        for (int i = 0; i < size -1; i++){
-            counter.add(cells.get(i));
-        }
+        counter.add(cells);
         return counter.getMissingColor(size);
+    }
+
+    private Proof lookForSpecialCase(ICell[] cells){
+        ColorCounter counter = new ColorCounter();
+        counter.add(cells);
+        Proof oddOneOut = counter.getOddOneOut(size);
+
+        //TODO complete
+        return checkForPossibleThreeInRow(cells, oddOneOut.inverse());
+    }
+
+    private Proof checkForPossibleThreeInRow(ICell[] cells, State threeInRowColor){
+        if (threeInRowColor == State.INVALID){
+            return new Proof();
+        }
+        //TODO complete
+        //Do you need to include the cell you are trying to prove???
+        //Will excluding the cell lead to the program """finding""" a possible 3 in row, where the cell is actually in the way
+        //In that case:
+        //maybe rewrite the getOtherNeighbour to NOT exclude it, and Counter to exclude it
+        //OR write a getNeighbour cells which includes it
+        return new Proof();
     }
 
     private Proof provableBySameRow(Position position){return new Proof();}

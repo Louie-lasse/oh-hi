@@ -25,4 +25,8 @@ public class Proof {
     boolean isColored(){
         return color.isColored;
     }
+
+    State inverse(){
+        return color.inverse();
+    }
 }
