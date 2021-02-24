@@ -1,5 +1,7 @@
 package model;
 
+import Application.Main;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -22,7 +24,8 @@ public class OriginalModel implements IModel{
 
     private final Random random = new Random();
 
-    public void createWorld(int size){
+    public void createWorld(int size) throws IllegalWorldSizeException {
+        if (size%2!=0) throw new IllegalWorldSizeException(size);
         this.size = size;
         world = new Cell[size][size];
         fillWorldWithColoredCells();
@@ -66,8 +69,12 @@ public class OriginalModel implements IModel{
         }
         if (random.nextBoolean()){
             world[row][col].setColor(State.RED);
+            //TODO remove
+            System.out.println("set "+State.RED+" at "+row+", "+col);
         } else {
             world[row][col].setColor(State.BLUE);
+            //TODO remove
+            System.out.println("set "+State.BLUE+" at "+row+", "+col);
         }
         return 1;
     }
@@ -81,8 +88,15 @@ public class OriginalModel implements IModel{
                     continue;
                 }
                 proof = getProof(row, col);
+                if (proof.getColor() == State.INVALID){
+                    //TODO remove
+                    Main.displayWorld(world);
+                    proof = getProof(row, col);
+                }
                 if (proof.isColored()){
                     world[row][col].setColor(proof.getColor());
+                    //TODO remove
+                    System.out.println("set "+proof.getColor()+" at "+row+", "+col+" (proven)");
                     row = 0;
                     col = 0;
                     filledCells++;
@@ -118,7 +132,8 @@ public class OriginalModel implements IModel{
 
     private Proof getProof(int row, int column){
         Proof proof = new Proof();
-        proof.add(provableByNeighbour(row, column));
+        proof.add(provableByThreeInARow(row, column));
+        proof.add(provableBySameAmountInLine(row, column));
         //proof.add(provableOnRow(row, column));
         //proof.add(provableOnCol(row, column));
         //proof.add(provableBySameRow(position));
@@ -126,8 +141,8 @@ public class OriginalModel implements IModel{
         return proof;
     }
 
-    //simplification of provableByNeighbour
-    private Proof provableByNeighbour(int row, int column){
+    //simplification of provableByThreeInARow
+    private Proof provableByThreeInARow(int row, int column){
         Proof proof = new Proof();
         List<ICell> cellsOnRow = getNeighboursOnRow(row, column);
         List<ICell> cellsOnColumn = getNeighboursOnColumn(row, column);
@@ -182,60 +197,53 @@ public class OriginalModel implements IModel{
         return proof;
     }
 
-    //TODO det här ser wack ut
-    private Proof provableOnRow(int row, int column){
+    private Proof provableBySameAmountInLine(int row, int column){
         Proof proof = new Proof();
-        int blueCount = countOnRow(row, State.BLUE);
-        int redCount = countOnRow(row, State.RED);
-        if (blueCount + 1 >= size/2){
-            proof.add(State.BLUE); //är detta verkligen rätt
-        }
-        if (redCount +1 >= size/2){
-            proof.add(State.RED);
-        }
+        proof.add( proofByAmountInRow(row, column) );
+        proof.add( proofByAmountInColumn(row, column));
         return proof;
     }
 
-    private int countOnRow(int row, State color){
-        int count = 0;
-        for (ICell cell: world[row]){
-            if (cell.getState().equals(color)) count++;
-        }
-        return count;
-    }
-
-
-    private Proof provableOnCol(int row, int column){
+    private Proof proofByAmountInRow(int row, int column){
         Proof proof = new Proof();
-        int blueCount = countOnColumn(row, State.BLUE);
-        int redCount = countOnColumn(row, State.RED);
-        if (blueCount + 1 >= size/2){
-            proof.add(State.BLUE);
-        }
-        if (redCount +1 >= size/2){
-            proof.add(State.RED);
-        }
-        return proof;    }
-
-    private Proof countOnColumn(Position position){
-        Proof proof = new Proof();
-        int blueCount = countOnColumn(position.column, State.BLUE);
-        int redCount = countOnColumn(position.column, State.RED);
-        if (blueCount + 1 >= size/2){
-            proof.add(State.BLUE);
-        }
-        if (redCount +1 >= size/2){
-            proof.add(State.RED);
-        }
+        List<ICell> cellsOnRow = collectOtherCellsOnRow(row, column);
+        proof.add(lookForMissingColor(cellsOnRow));
         return proof;
     }
 
-    private int countOnColumn(int col, State color){
-        int count = 0;
-        for (ICell[] cell: world){
-            if (cell[col].getState().equals(color)) count++;
+    private List<ICell> collectOtherCellsOnRow(int row, int columnToExclude){
+        List<ICell> cellsOnRow = new ArrayList<>();
+        for (int column = 0; column < size; column++){
+            if (column != columnToExclude){
+                cellsOnRow.add(world[row][column]);
+            }
         }
-        return count;
+        return cellsOnRow;
+    }
+
+    private Proof proofByAmountInColumn(int row, int column){
+        Proof proof = new Proof();
+        List<ICell> cellsOnColumn = collectOtherCellsOnColumn(row, column);
+        proof.add(lookForMissingColor(cellsOnColumn));
+        return proof;
+    }
+
+    private List<ICell> collectOtherCellsOnColumn(int rowToExclude, int column){
+        List<ICell> cellsOnColumn = new ArrayList<>();
+        for (int row = 0; row < size; row++){
+            if (row != rowToExclude){
+                cellsOnColumn.add(world[row][column]);
+            }
+        }
+        return cellsOnColumn;
+    }
+
+    private Proof lookForMissingColor(List<ICell> cells){
+        ColorCounter counter = new ColorCounter();
+        for (int i = 0; i < size -1; i++){
+            counter.add(cells.get(i));
+        }
+        return counter.getMissingColor(size);
     }
 
     private Proof provableBySameRow(Position position){return new Proof();}

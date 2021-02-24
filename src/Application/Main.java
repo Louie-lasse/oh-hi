@@ -10,7 +10,7 @@ import static java.lang.System.out;
 public class Main {
     public static void main(String[] args) {
         IModel model = new OriginalModel();
-        model.createWorld(4);
+        model.createWorld(6);
         displayWorld(model.getWorld());
     }
 
