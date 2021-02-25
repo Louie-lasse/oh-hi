@@ -24,7 +24,7 @@ public class OriginalModel implements IModel{
 
     private final Random random = new Random();
 
-    public void createWorld(int size) throws IllegalWorldSizeException {
+    public void createWorld(int size) throws IllegalWorldSizeException, WorldCreationException {
         if (size%2!=0) throw new IllegalWorldSizeException(size);
         this.size = size;
         world = new Cell[size][size];
@@ -69,17 +69,13 @@ public class OriginalModel implements IModel{
         }
         if (random.nextBoolean()){
             world[row][col].setColor(State.RED);
-            //TODO remove
-            System.out.println("set "+State.RED+" at "+row+", "+col);
         } else {
             world[row][col].setColor(State.BLUE);
-            //TODO remove
-            System.out.println("set "+State.BLUE+" at "+row+", "+col);
         }
         return 1;
     }
 
-    private int fillAllProvenCells() {
+    private int fillAllProvenCells() throws WorldCreationException {
         int filledCells = 0;
         Proof proof;
         for (int row = 0; row < size; row++){
@@ -89,14 +85,11 @@ public class OriginalModel implements IModel{
                 }
                 proof = getProof(row, col);
                 if (proof.getColor() == State.INVALID){
-                    //TODO remove
-                    Main.displayWorld(world);
-                    proof = getProof(row, col);
+                    //TODO maybe remove if statement
+                    throw new WorldCreationException();
                 }
                 if (proof.isColored()){
                     world[row][col].setColor(proof.getColor());
-                    //TODO remove
-                    System.out.println("set "+proof.getColor()+" at "+row+", "+col+" (proven)");
                     row = 0;
                     col = 0;
                     filledCells++;
@@ -205,10 +198,12 @@ public class OriginalModel implements IModel{
     }
 
     private Proof proofByAmountInRow(int row, int column){
+        //TODO combine proof by row and col, as the only difference is which collect method is called
+        //See threeInRow proof for reference
         Proof proof = new Proof();
         ICell[] cellsOnRow = collectOtherCellsOnRow(row, column);
         proof.add(lookForMissingColor(cellsOnRow));
-        proof.add(lookForSpecialCase(cellsOnRow));
+        //proof.add(lookForSpecialCase(cellsOnRow));
         return proof;
     }
 
@@ -227,7 +222,7 @@ public class OriginalModel implements IModel{
         Proof proof = new Proof();
         ICell[] cellsOnColumn = collectOtherCellsOnColumn(row, column);
         proof.add(lookForMissingColor(cellsOnColumn));
-        proof.add(lookForSpecialCase(cellsOnColumn));
+        //proof.add(lookForSpecialCase(cellsOnColumn));
         return proof;
     }
 
