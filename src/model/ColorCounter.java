@@ -27,15 +27,14 @@ class ColorCounter {
     }
 
     State lookForMissingRed(int size){
-        //TODO amount < size is incorrect and probably redundant
-        if (redAmount < size && blueAmount == size/2) {
+        if (redAmount < size/2 && blueAmount == size/2) {
             return State.RED;
         }
         return State.NONE;
     }
 
     State lookForMissingBlue(int size){
-        if (blueAmount < size && redAmount == size/2) {
+        if (blueAmount < size/2 && redAmount == size/2) {
             return State.BLUE;
         }
         return State.NONE;
