@@ -192,18 +192,12 @@ public class OriginalModel implements IModel{
 
     private Proof provableBySameAmountInLine(int row, int column){
         Proof proof = new Proof();
-        proof.add( proofByAmountInRow(row, column) );
-        proof.add( proofByAmountInColumn(row, column));
-        return proof;
-    }
-
-    private Proof proofByAmountInRow(int row, int column){
-        //TODO combine proof by row and col, as the only difference is which collect method is called
-        //See threeInRow proof for reference
-        Proof proof = new Proof();
         ICell[] cellsOnRow = collectOtherCellsOnRow(row, column);
+        ICell[] cellsOnColumn = collectOtherCellsOnColumn(row, column);
         proof.add(lookForMissingColor(cellsOnRow));
+        proof.add(lookForMissingColor(cellsOnColumn));
         //proof.add(lookForSpecialCase(cellsOnRow));
+        //proof.add(lookForSpecialCase(cellsOnColumn));
         return proof;
     }
 
@@ -216,14 +210,6 @@ public class OriginalModel implements IModel{
             }
         }
         return cellsOnRow;
-    }
-
-    private Proof proofByAmountInColumn(int row, int column){
-        Proof proof = new Proof();
-        ICell[] cellsOnColumn = collectOtherCellsOnColumn(row, column);
-        proof.add(lookForMissingColor(cellsOnColumn));
-        //proof.add(lookForSpecialCase(cellsOnColumn));
-        return proof;
     }
 
     private ICell[] collectOtherCellsOnColumn(int rowToExclude, int column){
