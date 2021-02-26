@@ -1,7 +1,5 @@
 package model;
 
-import Application.Main;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -192,8 +190,8 @@ public class OriginalModel implements IModel{
 
     private Proof provableBySameAmountInLine(int row, int column){
         Proof proof = new Proof();
-        ICell[] cellsOnRow = collectOtherCellsOnRow(row, column);
-        ICell[] cellsOnColumn = collectOtherCellsOnColumn(row, column);
+        ICell[] cellsOnRow = collectCellsOnRow(row, column);
+        ICell[] cellsOnColumn = collectCellsOnColumn(row, column);
         proof.add(lookForMissingColor(cellsOnRow));
         proof.add(lookForMissingColor(cellsOnColumn));
         //proof.add(lookForSpecialCase(cellsOnRow));
@@ -201,23 +199,25 @@ public class OriginalModel implements IModel{
         return proof;
     }
 
-    private ICell[] collectOtherCellsOnRow(int row, int columnToExclude) {
-        ICell[] cellsOnRow = new ICell[size - 1];
-        int arrayIndex = 0;
+    private ICell[] collectCellsOnRow(int row, int columnToExclude) {
+        ICell[] cellsOnRow = new ICell[size];
         for (int column = 0; column < size; column++) {
             if (column != columnToExclude) {
-                cellsOnRow[arrayIndex++] = (world[row][column]);
+                cellsOnRow[column] = (world[row][column]);
+            } else {
+                cellsOnRow[column] = new Cell(State.INVALID);
             }
         }
         return cellsOnRow;
     }
 
-    private ICell[] collectOtherCellsOnColumn(int rowToExclude, int column){
-        ICell[] cellsOnColumn = new ICell[size-1];
-        int arrayIndex = 0;
+    private ICell[] collectCellsOnColumn(int rowToExclude, int column){
+        ICell[] cellsOnColumn = new ICell[size];
         for (int row = 0; row < size; row++){
             if (row != rowToExclude){
-                cellsOnColumn[arrayIndex++] = (world[row][column]);
+                cellsOnColumn[row] = world[row][column];
+            } else {
+                cellsOnColumn[row] = new Cell(State.INVALID);
             }
         }
         return cellsOnColumn;
