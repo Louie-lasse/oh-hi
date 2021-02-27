@@ -5,6 +5,7 @@ public interface ICell {
     void makeEmpty();
     void setColor(State color);
     State getState();
+    boolean isEmpty();
     boolean isFilled();
 
     @Override

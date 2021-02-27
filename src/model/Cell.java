@@ -41,8 +41,12 @@ public class Cell implements ICell{
         return state;
     }
 
+    public boolean isEmpty() {
+        return state.equals(State.NONE);
+    }
+
     public boolean isFilled(){
-        return !state.equals(State.NONE);
+        return !isEmpty();
     }
 
     @Override

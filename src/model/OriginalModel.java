@@ -20,7 +20,7 @@ public class OriginalModel implements IModel{
         return world;
     }
 
-    private final Random random = new Random();
+    private static final Random random = new Random();
 
     public void createWorld(int size) throws IllegalWorldSizeException, WorldCreationException {
         if (size%2!=0) throw new IllegalWorldSizeException(size);
@@ -41,6 +41,7 @@ public class OriginalModel implements IModel{
         fillAllProvenCells();
         Main.displayWorld(world);
     }
+
 
     private void fillWorldWithColoredCells() throws WorldCreationException {
         fillWorldWithEmptyCells();
@@ -70,18 +71,21 @@ public class OriginalModel implements IModel{
 
 
     private int fillRandomCell(){
-        //TODO
-        //FIXME Is it less random if the position is not random?
-        int row = 0;
-        int col = 0;
-        while (world[row][col].isFilled()){
-            row = random.nextInt(size);
-            col = random.nextInt(size);
+        for (ICell[] row: world) {
+            for (ICell cell : row) {
+                if (cell.isEmpty()) {
+                    return fillCellWithRandomColor(cell);
+                }
+            }
         }
+        return 0;
+    }
+
+    private int fillCellWithRandomColor(ICell cell){
         if (random.nextBoolean()){
-            world[row][col].setColor(State.RED);
+            cell.setColor(State.RED);
         } else {
-            world[row][col].setColor(State.BLUE);
+            cell.setColor(State.BLUE);
         }
         return 1;
     }

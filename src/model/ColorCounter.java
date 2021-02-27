@@ -50,4 +50,5 @@ class ColorCounter {
         }
         return oddOneOut;
     }
+
 }
