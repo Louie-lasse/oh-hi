@@ -10,6 +10,7 @@ import static java.lang.System.out;
 public class Main {
     public static void main(String[] args) {
         IModel model = new OriginalModel();
+        //model.test();
         model.createWorld(6);
         displayWorld(model.getWorld());
     }

@@ -3,7 +3,13 @@ package model;
 public class Proof {
     private State color;
 
-    Proof(){ this.color = State.NONE; }
+    Proof(State initialColor){
+        color = initialColor;
+    }
+
+    Proof(){
+        this(State.NONE);
+    }
 
     void add(State state){
         if (color.equals(State.NONE)){
@@ -18,6 +24,10 @@ public class Proof {
         this.add(proof.getColor());
     }
 
+    void add(ICell cell) {
+        this.add(cell.getState());
+    }
+
     State getColor(){
         return color;
     }
@@ -28,5 +38,14 @@ public class Proof {
 
     State inverse(){
         return color.inverse();
+    }
+
+    boolean isValid(){
+        return color!=State.INVALID;
+    }
+
+    @Override
+    public String toString(){
+        return color.toString();
     }
 }

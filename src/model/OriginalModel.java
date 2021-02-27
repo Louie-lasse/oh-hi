@@ -1,5 +1,7 @@
 package model;
 
+import Application.Main;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -9,8 +11,6 @@ public class OriginalModel implements IModel{
     private ICell[][] world;
 
     private int size;
-
-    private boolean completed;
 
     public OriginalModel() {}
 
@@ -30,7 +30,19 @@ public class OriginalModel implements IModel{
         removeAllRemovableCells();
     }
 
-    private void fillWorldWithColoredCells(){
+    //TODO remove when testing is done
+    public void test(){
+        world = new ICell[6][6];
+        size = 6;
+        fillWorldWithEmptyCells();
+        ICell[] row = {new Cell(State.RED), new Cell(), new Cell(), new Cell(State.BLUE), new Cell(), new Cell(State.RED)};
+        world[0] = row;
+        Main.displayWorld(world);
+        fillAllProvenCells();
+        Main.displayWorld(world);
+    }
+
+    private void fillWorldWithColoredCells() throws WorldCreationException {
         fillWorldWithEmptyCells();
         colorAllCellsInWorld();
     }
@@ -43,7 +55,7 @@ public class OriginalModel implements IModel{
         }
     }
 
-    private void colorAllCellsInWorld() {
+    private void colorAllCellsInWorld() throws WorldCreationException {
         int filledCells = 0;
         boolean lookForProvenCells = false;
         while (filledCells < size * size){
@@ -58,6 +70,7 @@ public class OriginalModel implements IModel{
 
 
     private int fillRandomCell(){
+        //TODO
         //FIXME Is it less random if the position is not random?
         int row = 0;
         int col = 0;
@@ -82,8 +95,7 @@ public class OriginalModel implements IModel{
                     continue;
                 }
                 proof = getProof(row, col);
-                if (proof.getColor() == State.INVALID){
-                    //TODO maybe remove if statement
+                if (!proof.isValid()){
                     throw new WorldCreationException();
                 }
                 if (proof.isColored()){
@@ -109,7 +121,7 @@ public class OriginalModel implements IModel{
     }
 
     public boolean isCompleted(){
-        return completed;
+        return false;
     }
 
     public void nextState(Position position){
@@ -128,7 +140,6 @@ public class OriginalModel implements IModel{
         //proof.add(provableOnRow(row, column));
         //proof.add(provableOnCol(row, column));
         //proof.add(provableBySameRow(position));
-        //proof.add(provableByOddOneOut(position));
         return proof;
     }
 
@@ -194,8 +205,8 @@ public class OriginalModel implements IModel{
         ICell[] cellsOnColumn = collectCellsOnColumn(row, column);
         proof.add(lookForMissingColor(cellsOnRow));
         proof.add(lookForMissingColor(cellsOnColumn));
-        //proof.add(lookForSpecialCase(cellsOnRow));
-        //proof.add(lookForSpecialCase(cellsOnColumn));
+        proof.add(lookForSpecialCase(cellsOnRow));
+        proof.add(lookForSpecialCase(cellsOnColumn));
         return proof;
     }
 
@@ -229,26 +240,35 @@ public class OriginalModel implements IModel{
         return counter.getMissingColor(size);
     }
 
-    private Proof lookForSpecialCase(ICell[] cells){
+    private State lookForSpecialCase(ICell[] cells){
         ColorCounter counter = new ColorCounter();
         counter.add(cells);
         Proof oddOneOut = counter.getOddOneOut(size);
-
-        //TODO complete
-        return checkForPossibleThreeInRow(cells, oddOneOut.inverse());
+        if (possibleThreeInRow(cells, oddOneOut.inverse())) {
+            return oddOneOut.inverse();
+        }
+        return State.NONE;
     }
 
-    private Proof checkForPossibleThreeInRow(ICell[] cells, State threeInRowColor){
-        if (threeInRowColor == State.INVALID){
-            return new Proof();
+    private boolean possibleThreeInRow(ICell[] cells, State colorToLookFor){
+        if (colorToLookFor == State.INVALID){
+            return false;
         }
-        //TODO complete
-        //Do you need to include the cell you are trying to prove???
-        //Will excluding the cell lead to the program """finding""" a possible 3 in row, where the cell is actually in the way
-        //In that case:
-        //maybe rewrite the getOtherNeighbour to NOT exclude it, and Counter to exclude it
-        //OR write a getNeighbour cells which includes it
-        return new Proof();
+        Proof color = new Proof(colorToLookFor);
+        int possibleColorsInRow = 0;
+        for (ICell cell: cells){
+            color.add(cell);
+            if (color.isValid()){
+                possibleColorsInRow++;
+                if (possibleColorsInRow==3){
+                    return true;
+                }
+            } else {
+                possibleColorsInRow = 0;
+                color = new Proof(colorToLookFor);
+            }
+        }
+        return false;
     }
 
     private Proof provableBySameRow(Position position){return new Proof();}
