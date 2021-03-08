@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static model.State.*;
+
 public class OriginalModel implements IModel{
 
     private ICell[][] world;
@@ -26,17 +28,27 @@ public class OriginalModel implements IModel{
         if (size%2!=0) throw new IllegalWorldSizeException(size);
         this.size = size;
         world = new Cell[size][size];
-        fillWorldWithColoredCells();
-        removeAllRemovableCells();
+        boolean completed = false;
+        while (!completed){
+            try{
+                fillWorldWithColoredCells();
+                removeAllRemovableCells();
+                completed = true;
+            } catch (WorldCreationException creationException){ }
+        }
     }
 
     //TODO remove when testing is done
     public void test(){
-        world = new ICell[6][6];
         size = 6;
-        fillWorldWithEmptyCells();
-        ICell[] row = {new Cell(State.RED), new Cell(), new Cell(), new Cell(State.BLUE), new Cell(), new Cell(State.RED)};
-        world[0] = row;
+        ICell[][] testWorld = { //Wrong world
+                {new Cell(State.BLUE), new Cell(State.BLUE), new Cell(State.RED),  new Cell(State.RED),  new Cell(State.BLUE), new Cell(State.RED)},
+                {new Cell(State.RED),  new Cell(State.BLUE), new Cell(State.RED),  new Cell(State.BLUE), new Cell(State.RED),  new Cell(State.BLUE)},
+                {new Cell(State.RED),  new Cell(State.RED),  new Cell(State.BLUE), new Cell(State.RED),  new Cell(State.BLUE), new Cell(State.BLUE)},
+                {new Cell(State.BLUE), new Cell(State.RED),  new Cell(State.BLUE), new Cell(State.BLUE), new Cell(State.RED),  new Cell(State.RED)},
+                {new Cell(State.BLUE), new Cell(State.BLUE), new Cell(State.RED),  new Cell(State.BLUE), new Cell(State.RED),  new Cell(State.RED)},
+                {new Cell(State.RED),  new Cell(State.RED),  new Cell(State.BLUE), new Cell(State.NONE), new Cell(State.NONE), new Cell(State.NONE)}};
+        world = testWorld;
         Main.displayWorld(world);
         fillAllProvenCells();
         Main.displayWorld(world);
@@ -71,6 +83,10 @@ public class OriginalModel implements IModel{
 
 
     private int fillRandomCell(){
+        //TODO examine whether this is random enough
+        //If this lever of random leads to the puzzle basically having ONE color,
+        //while more random gives a more diverse puzzle, then fix by choosing a random position to fill
+        //maybe write Position randomPosition() method
         for (ICell[] row: world) {
             for (ICell cell : row) {
                 if (cell.isEmpty()) {
@@ -83,9 +99,9 @@ public class OriginalModel implements IModel{
 
     private int fillCellWithRandomColor(ICell cell){
         if (random.nextBoolean()){
-            cell.setColor(State.RED);
+            cell.setState(State.RED);
         } else {
-            cell.setColor(State.BLUE);
+            cell.setState(State.BLUE);
         }
         return 1;
     }
@@ -100,10 +116,11 @@ public class OriginalModel implements IModel{
                 }
                 proof = getProof(row, col);
                 if (!proof.isValid()){
+                    Main.displayWorld(world);
                     throw new WorldCreationException();
                 }
                 if (proof.isColored()){
-                    world[row][col].setColor(proof.getColor());
+                    cellAt(row, col).setState(proof.getColor());
                     row = 0;
                     col = 0;
                     filledCells++;
@@ -137,17 +154,19 @@ public class OriginalModel implements IModel{
         return world[position.row][position.column];
     }
 
+    private ICell cellAt(int row, int column){
+        Position position = new Position(row, column);
+        return cellAt(position);
+    }
+
     private Proof getProof(int row, int column){
         Proof proof = new Proof();
         proof.add(provableByThreeInARow(row, column));
         proof.add(provableBySameAmountInLine(row, column));
-        //proof.add(provableOnRow(row, column));
-        //proof.add(provableOnCol(row, column));
-        //proof.add(provableBySameRow(position));
+        proof.add(provableByNoSamePattern(row, column));
         return proof;
     }
 
-    //simplification of provableByThreeInARow
     private Proof provableByThreeInARow(int row, int column){
         Proof proof = new Proof();
         List<ICell> cellsOnRow = getNeighboursOnRow(row, column);
@@ -251,7 +270,7 @@ public class OriginalModel implements IModel{
         if (possibleThreeInRow(cells, oddOneOut.inverse())) {
             return oddOneOut.inverse();
         }
-        return State.NONE;
+        return NONE;
     }
 
     private boolean possibleThreeInRow(ICell[] cells, State colorToLookFor){
@@ -275,9 +294,65 @@ public class OriginalModel implements IModel{
         return false;
     }
 
-    private Proof provableBySameRow(Position position){return new Proof();}
+    private Proof provableByNoSamePattern(int row, int column){
+        Proof proof = new Proof();
+        proof.add(findSimilarRow(row, column));
+        proof.add(findSimilarColumn(row, column));
+        return proof;
+    }
 
-    private Proof provableByOddOneOut(Position position){return new Proof();}
+    private Proof findSimilarRow(int row, int column){
+        Proof proof = new Proof();
+        ICell[] cellsOnRow = collectCellsOnRow(row, column);
+        ICell[] alt;
+        for (int i = 0; i < size; i++){
+            if (i != row){
+                alt = collectCellsOnRow(i, column);
+                proof.add(findSimilarity(cellsOnRow, alt));
+            }
+        }
+        return proof;
+    }
+
+    private Proof findSimilarColumn(int row, int column) {
+        Proof proof = new Proof();
+        ICell[] cellsOnColumn = collectCellsOnColumn(row, column);
+        ICell[] alt;
+        for (int i = 0; i < size; i++){
+            if (i != column){
+                alt = collectCellsOnColumn(row, i);
+                proof.add(findSimilarity(cellsOnColumn, alt));
+            }
+        }
+        return proof;
+    }
+
+    private State findSimilarity(ICell[] mainCellArray, ICell[] comparedTo){
+        //TODO have colorA/B be cells instead to increase readablility;
+        State colorA = NONE;
+        State colorB = NONE;
+        for (int index = 0; index < size; index++){
+            if (!mainCellArray[index].isValid()){
+                colorA = comparedTo[index].getState(); //Is always invalid. Not problem IF you never need to compare to A
+            } else if (comparedTo[index].isEmpty()) {
+                return NONE;
+            } else if (mainCellArray[index].isEmpty()){
+                if (colorB == NONE){
+                    colorB = comparedTo[index].getState();
+                } else if (colorB != comparedTo[index].getState()){
+                    return NONE;
+                }
+            } else {
+                if (!mainCellArray[index].equals(comparedTo[index])){
+                    return NONE;
+                }
+            }
+        }
+        if (colorA == colorB){
+            return NONE;
+        }
+        return colorB;
+    }
 
     private List<ICell> getAllProvenCells(){
         List<ICell> provenCells = new ArrayList<>();

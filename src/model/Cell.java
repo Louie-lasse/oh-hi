@@ -13,8 +13,8 @@ public class Cell implements ICell{
 
     public void nextState(){
         switch (state.ordinal()) {
-            case (0) -> setColor(State.RED);
-            case (1) -> setColor(State.BLUE);
+            case (0) -> setState(State.RED);
+            case (1) -> setState(State.BLUE);
             case (3) -> makeEmpty();
         }
     }
@@ -31,7 +31,7 @@ public class Cell implements ICell{
         state = State.NONE;
     }
 
-    public void setColor(State color) {
+    public void setState(State color) {
         if (color.isColored) {
             this.state = color;
         }
@@ -52,5 +52,9 @@ public class Cell implements ICell{
     @Override
     public String toString(){
         return state.toString();
+    }
+
+    public boolean isValid(){
+        return !(state==State.INVALID);
     }
 }

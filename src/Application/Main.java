@@ -10,7 +10,15 @@ import static java.lang.System.out;
 public class Main {
     public static void main(String[] args) {
         IModel model = new OriginalModel();
-        model.createWorld(6);
+        boolean testing = false;
+        if (testing){
+            model.test();
+        } else {
+            for (int i = 0; i < 100; i++) {
+                model.createWorld(6);
+                displayWorld(model.getWorld());
+            }
+        }
     }
 
     public static void displayWorld(ICell[][] world){
