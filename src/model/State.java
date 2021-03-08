@@ -17,4 +17,14 @@ public enum State {
         if (this==BLUE) return RED;
         return this;
     }
+
+    @Override
+    public String toString(){
+        return switch (this.ordinal()) {
+            case 0 -> "NONE";
+            case 1 -> "RED";
+            case 2 -> "BLUE";
+            default -> "INVALID";
+        };
+    }
 }

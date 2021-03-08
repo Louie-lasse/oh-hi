@@ -42,12 +42,13 @@ class ColorCounter {
 
     Proof getOddOneOut(int size){
         Proof oddOneOut = new Proof();
-        if (redAmount + 1 == size){
+        if (redAmount + 1 == size/2){
             oddOneOut.add(State.RED);
         }
-        if (blueAmount + 1 == size){
+        if (blueAmount + 1 == size/2){
             oddOneOut.add(State.BLUE);
         }
         return oddOneOut;
     }
+
 }
