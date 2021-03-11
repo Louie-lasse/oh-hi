@@ -1,7 +1,10 @@
 package model;
 
+import java.util.Random;
+
 public class Cell implements ICell{
     private State state;
+    private static Random random = new Random();
 
     Cell(State startingState){
         this.state=startingState;
@@ -56,5 +59,17 @@ public class Cell implements ICell{
 
     public boolean isValid(){
         return !(state==State.INVALID);
+    }
+
+    public void fillWithRandomColor(){
+        if (random.nextBoolean()){
+            state = State.BLUE;
+        } else {
+            state = State.RED;
+        }
+    }
+
+    public void invertColor(){
+        state = state.inverse();
     }
 }

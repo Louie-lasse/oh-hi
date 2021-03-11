@@ -1,7 +1,5 @@
 package model;
 
-import Application.Main;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -11,6 +9,8 @@ import static model.State.*;
 public class OriginalModel implements IModel{
 
     private ICell[][] world;
+
+    private ICell[][] completeWorld;
 
     private int size;
 
@@ -28,36 +28,14 @@ public class OriginalModel implements IModel{
         if (size%2!=0) throw new IllegalWorldSizeException(size);
         this.size = size;
         world = new Cell[size][size];
-        boolean completed = false;
-        while (!completed){
-            try{
-                fillWorldWithColoredCells();
-                removeAllRemovableCells();
-                completed = true;
-            } catch (WorldCreationException creationException){ }
-        }
+        fillWorldWithColoredCells();
+        saveCompleteWorld();
+        removeAllRemovableCells();
     }
-
-    //TODO remove when testing is done
-    public void test(){
-        size = 6;
-        ICell[][] testWorld = { //Wrong world
-                {new Cell(State.BLUE), new Cell(State.BLUE), new Cell(State.RED),  new Cell(State.RED),  new Cell(State.BLUE), new Cell(State.RED)},
-                {new Cell(State.RED),  new Cell(State.BLUE), new Cell(State.RED),  new Cell(State.BLUE), new Cell(State.RED),  new Cell(State.BLUE)},
-                {new Cell(State.RED),  new Cell(State.RED),  new Cell(State.BLUE), new Cell(State.RED),  new Cell(State.BLUE), new Cell(State.BLUE)},
-                {new Cell(State.BLUE), new Cell(State.RED),  new Cell(State.BLUE), new Cell(State.BLUE), new Cell(State.RED),  new Cell(State.RED)},
-                {new Cell(State.BLUE), new Cell(State.BLUE), new Cell(State.RED),  new Cell(State.BLUE), new Cell(State.RED),  new Cell(State.RED)},
-                {new Cell(State.RED),  new Cell(State.RED),  new Cell(State.BLUE), new Cell(State.NONE), new Cell(State.NONE), new Cell(State.NONE)}};
-        world = testWorld;
-        Main.displayWorld(world);
-        fillAllProvenCells();
-        Main.displayWorld(world);
-    }
-
 
     private void fillWorldWithColoredCells() throws WorldCreationException {
         fillWorldWithEmptyCells();
-        colorAllCellsInWorld();
+        addLayer();
     }
 
     private void fillWorldWithEmptyCells(){
@@ -68,45 +46,74 @@ public class OriginalModel implements IModel{
         }
     }
 
-    private void colorAllCellsInWorld() throws WorldCreationException {
-        int filledCells = 0;
-        boolean lookForProvenCells = false;
-        while (filledCells < size * size){
-            if (lookForProvenCells) {
-                filledCells += fillAllProvenCells();
-            } else {
-                filledCells += fillRandomCell();
-            }
-            lookForProvenCells = !lookForProvenCells;
+    void addLayer() throws WorldCreationException{
+        List<ICell> filledCells = new ArrayList<>();
+        if (!fillAndGetProvenCells(filledCells)){
+            remove(filledCells);
+            throw new WorldCreationException();
         }
-    }
-
-
-    private int fillRandomCell(){
-        //TODO examine whether this is random enough
-        //If this lever of random leads to the puzzle basically having ONE color,
-        //while more random gives a more diverse puzzle, then fix by choosing a random position to fill
-        //maybe write Position randomPosition() method
-        for (ICell[] row: world) {
-            for (ICell cell : row) {
-                if (cell.isEmpty()) {
-                    return fillCellWithRandomColor(cell);
+        if (!worldIsFilled()){
+            ICell randomCell = getRandomEmptyCellFromWorld();
+            randomCell.fillWithRandomColor();
+            try{
+                addLayer();
+            } catch (WorldCreationException e1){
+                randomCell.invertColor();
+                try {
+                    addLayer();
+                } catch (WorldCreationException e2){
+                    remove(filledCells);
+                    remove(randomCell);
+                    throw new WorldCreationException();
                 }
             }
         }
-        return 0;
     }
 
-    private int fillCellWithRandomColor(ICell cell){
-        if (random.nextBoolean()){
-            cell.setState(State.RED);
-        } else {
-            cell.setState(State.BLUE);
+    void remove(ICell cell){
+        cell.makeEmpty();
+    }
+
+    void remove(List<ICell> cells){
+        for (ICell cell: cells){
+            remove(cell);
         }
-        return 1;
+    }
+
+    private boolean worldIsFilled(){
+        for (ICell[] row: world){
+            for (ICell cell: row){
+                if (cell.isEmpty()){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private ICell getRandomEmptyCellFromWorld(){
+        int randomRow;
+        int randomColumn;
+        do{
+            randomRow = random.nextInt(size);
+            randomColumn = random.nextInt(size);
+        } while (cellAt(randomRow, randomColumn).isFilled());
+        return cellAt(randomRow, randomColumn);
+    }
+
+    void saveCompleteWorld(){
+        completeWorld = new ICell[size][size];
+        for (int row = 0; row < size; row++){
+            saveRowInWorld(row);
+        }
+    }
+
+    private void saveRowInWorld(int row){
+        System.arraycopy(world[row], 0, completeWorld[row], 0, size);
     }
 
     private int fillAllProvenCells() throws WorldCreationException {
+        //FIXME don't remove yet. May want to use this to improve removeAllRemovableCells()
         int filledCells = 0;
         Proof proof;
         for (int row = 0; row < size; row++){
@@ -116,7 +123,6 @@ public class OriginalModel implements IModel{
                 }
                 proof = getProof(row, col);
                 if (!proof.isValid()){
-                    Main.displayWorld(world);
                     throw new WorldCreationException();
                 }
                 if (proof.isColored()){
@@ -128,6 +134,30 @@ public class OriginalModel implements IModel{
             }
         }
         return filledCells;
+    }
+
+    boolean fillAndGetProvenCells(List<ICell> filledCells){
+        Proof proof;
+        ICell cell;
+        for (int row = 0; row < size; row++){
+            for (int col = 0; col < size; col++) {
+                cell = world[row][col];
+                if (cell.isFilled()){
+                    continue;
+                }
+                proof = getProof(row, col);
+                if (!proof.isValid()){
+                    return false;
+                }
+                if (proof.isColored()){
+                    cell.setState(proof.getColor());
+                    row = 0;
+                    col = -1;
+                    filledCells.add(cell);
+                }
+            }
+        }
+        return true;
     }
 
     private void removeAllRemovableCells(){
@@ -328,7 +358,7 @@ public class OriginalModel implements IModel{
     }
 
     private State findSimilarity(ICell[] mainCellArray, ICell[] comparedTo){
-        //TODO have colorA/B be cells instead to increase readablility;
+        //TODO have colorA/B be cells instead to make more readable
         State colorA = NONE;
         State colorB = NONE;
         for (int index = 0; index < size; index++){

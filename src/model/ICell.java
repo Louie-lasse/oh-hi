@@ -7,8 +7,9 @@ public interface ICell {
     State getState();
     boolean isEmpty();
     boolean isFilled();
-
+    void fillWithRandomColor();
+    boolean isValid();
     @Override
     boolean equals(Object c);
-    boolean isValid();
+    void invertColor();
 }
