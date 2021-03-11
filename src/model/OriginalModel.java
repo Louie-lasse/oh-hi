@@ -358,18 +358,17 @@ public class OriginalModel implements IModel{
     }
 
     private State findSimilarity(ICell[] mainCellArray, ICell[] comparedTo){
-        //TODO have colorA/B be cells instead to make more readable
-        State colorA = NONE;
-        State colorB = NONE;
+        ICell colorA = new Cell();
+        ICell colorB = new Cell();
         for (int index = 0; index < size; index++){
             if (!mainCellArray[index].isValid()){
-                colorA = comparedTo[index].getState(); //Is always invalid. Not problem IF you never need to compare to A
+                colorA = comparedTo[index];
             } else if (comparedTo[index].isEmpty()) {
                 return NONE;
             } else if (mainCellArray[index].isEmpty()){
-                if (colorB == NONE){
-                    colorB = comparedTo[index].getState();
-                } else if (colorB != comparedTo[index].getState()){
+                if (colorB.isEmpty()){
+                    colorB = comparedTo[index];
+                } else if (!colorB.equals(comparedTo[index])){
                     return NONE;
                 }
             } else {
@@ -381,7 +380,7 @@ public class OriginalModel implements IModel{
         if (colorA == colorB){
             return NONE;
         }
-        return colorB;
+        return colorB.getState();
     }
 
     private List<ICell> getAllProvenCells(){
