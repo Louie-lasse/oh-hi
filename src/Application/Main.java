@@ -10,15 +10,8 @@ import static java.lang.System.out;
 public class Main {
     public static void main(String[] args) {
         IModel model = new OriginalModel();
-        boolean testing = false;
-        if (testing){
-            model.test();
-        } else {
-            for (int i = 0; i < 100; i++) {
-                model.createWorld(6);
-                displayWorld(model.getWorld());
-            }
-        }
+        model.createWorld(10);
+        displayWorld(model.getWorld());
     }
 
     public static void displayWorld(ICell[][] world){
@@ -29,7 +22,7 @@ public class Main {
         out.println("\n");
     }
 
-    public static void displayRow(ICell[] row){
+    private static void displayRow(ICell[] row){
         for (ICell cell: row){
             out.print(cell.getState());
             out.print(", ");
