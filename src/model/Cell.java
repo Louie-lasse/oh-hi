@@ -4,7 +4,7 @@ import java.util.Random;
 
 public class Cell implements ICell{
     private State state;
-    private static Random random = new Random();
+    private static final Random random = new Random();
 
     Cell(State startingState){
         this.state=startingState;

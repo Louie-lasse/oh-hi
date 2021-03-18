@@ -119,30 +119,6 @@ public class OriginalModel implements IModel{
         }
     }
 
-    private int fillAllProvenCells() throws WorldCreationException {
-        //FIXME don't remove yet. May want to use this to improve removeAllRemovableCells()
-        int filledCells = 0;
-        Proof proof;
-        for (int row = 0; row < size; row++){
-            for (int col = 0; col < size; col++) {
-                if (world[row][col].isFilled()){
-                    continue;
-                }
-                proof = getProof(row, col);
-                if (!proof.isValid()){
-                    throw new WorldCreationException();
-                }
-                if (proof.isColored()){
-                    cellAt(row, col).setState(proof.getColor());
-                    row = 0;
-                    col = 0;
-                    filledCells++;
-                }
-            }
-        }
-        return filledCells;
-    }
-
     boolean fillAndGetProvenCells(List<ICell> filledCells){
         Proof proof;
         ICell cell;
@@ -167,20 +143,7 @@ public class OriginalModel implements IModel{
         return true;
     }
 
-    private void removeAllRemovableCells(){
-        List<ICell> provenCells;
-        ICell cell;
-        while (true){
-            provenCells = getAllProvenCells();
-            if (provenCells.size() == 0) break;
-            cell = getRandom(provenCells);
-            cell.makeEmpty();
-        }
-    }
-
     private void removeRedundantCells(){
-        //TODO can create irrational worlds. Don't know how or why. MAYBE one time error
-        //FIXME check if the world is complete before call. In that case, it's probably a invertColor() whats wack
         ICell[] cellsToCheck = getWorldAsArray();
         randomize(cellsToCheck);
         List<ICell> redundantCells = new ArrayList<>();
@@ -472,27 +435,5 @@ public class OriginalModel implements IModel{
         }
         return colorB.getState();
     }
-
-    private List<ICell> getAllProvenCells(){
-        List<ICell> provenCells = new ArrayList<>();
-        for (int row = 0; row < size; row++){
-            for (int col = 0; col < size; col++){
-                if (isProven(row, col) && world[row][col].isFilled()){
-                    provenCells.add(world[row][col]);
-                }
-            }
-        }
-        return provenCells;
-    }
-
-    private boolean isProven(int row, int col){
-        return getProof(row, col).isColored();
-    }
-
-    private ICell getRandom(List<ICell> cells){
-        int randomIndex = random.nextInt( cells.size() );
-        return cells.get(randomIndex);
-    }
-
 
 }
