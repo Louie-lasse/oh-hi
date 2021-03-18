@@ -1,11 +1,6 @@
 package model;
 
-import Application.Main;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import static model.State.*;
 
@@ -186,7 +181,8 @@ public class OriginalModel implements IModel{
     private void removeRedundantCells(){
         //TODO can create irrational worlds. Don't know how or why. MAYBE one time error
         //FIXME check if the world is complete before call. In that case, it's probably a invertColor() whats wack
-        ICell[] cellsToCheck = randomize(getWorldAsArray());
+        ICell[] cellsToCheck = getWorldAsArray();
+        randomize(cellsToCheck);
         List<ICell> redundantCells = new ArrayList<>();
         for (ICell cell: cellsToCheck){
             removeIfProven(cell, redundantCells);
@@ -204,9 +200,19 @@ public class OriginalModel implements IModel{
         return worldAsArray;
     }
 
-    private ICell[] randomize(ICell[] cells){
-        //TODO write this
-        return cells;
+    private void randomize(ICell[] cells){
+        int size = cells.length;
+        int randomIndex;
+        for (int i = 0; i < size; i++){
+            randomIndex = random.nextInt(size);
+            swap(cells, i, randomIndex);
+        }
+    }
+
+    private void swap(ICell[] cells, int oldIndex, int newIndex){
+        ICell tmp = cells[oldIndex];
+        cells[oldIndex] = cells[newIndex];
+        cells[newIndex] = tmp;
     }
 
     private void removeIfProven(ICell cell, List<ICell> redundantCells){
