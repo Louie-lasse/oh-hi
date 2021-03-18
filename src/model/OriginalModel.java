@@ -1,6 +1,9 @@
 package model;
 
+import Application.Main;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -30,7 +33,7 @@ public class OriginalModel implements IModel{
         world = new Cell[size][size];
         fillWorldWithColoredCells();
         saveCompleteWorld();
-        removeAllRemovableCells();
+        removeRedundantCells();
     }
 
     private void fillWorldWithColoredCells() throws WorldCreationException {
@@ -109,7 +112,9 @@ public class OriginalModel implements IModel{
     }
 
     private void saveRowInWorld(int row){
-        System.arraycopy(world[row], 0, completeWorld[row], 0, size);
+        for (int col = 0; col < size; col++) {
+            completeWorld[row][col] = cellAt(row, col).copy();
+        }
     }
 
     private int fillAllProvenCells() throws WorldCreationException {
@@ -171,8 +176,74 @@ public class OriginalModel implements IModel{
         }
     }
 
-    public boolean isCompleted(){
+    private void removeRedundantCells(){
+        //TODO can create irrational worlds. Don't know how or why. MAYBE one time error
+        //FIXME check if the world is complete before call. In that case, it's probably a inverColor() whats wack
+        ICell[] cellsToCheck = randomize(getWorldAsArray());
+        List<ICell> redundantCells = new ArrayList<>();
+        for (ICell cell: cellsToCheck){
+            removeIfProven(cell, redundantCells);
+        }
+    }
+
+    private ICell[] getWorldAsArray(){
+        ICell[] worldAsArray = new ICell[size*size];
+        int index = 0;
+        for (int row = 0; row < size; row++){
+            for(int column = 0; column < size; column++){
+                worldAsArray[index++] = cellAt(row, column);
+            }
+        }
+        return worldAsArray;
+    }
+
+    private ICell[] randomize(ICell[] cells){
+        //TODO write this
+        return cells;
+    }
+
+    private void removeIfProven(ICell cell, List<ICell> redundantCells){
+        //FIXME refractor out method removeIfExplcitlyProven
+        cell.invertColor();
+        if (anyCellIsInvalid()){    //if cell is explicitly needed
+            remove(cell);
+            redundantCells.add(cell);
+        } else {                    //if cell is implicitly needed
+            cell.invertColor();
+            removeIfImplicitlyProven(cell, redundantCells);
+        }
+    }
+
+    private boolean anyCellIsInvalid(){
+        for (int row = 0; row < size; row++){
+            for (int col = 0; col < size; col++){
+                if (!getProof(row, col).isValid()) return true;
+            }
+        }
         return false;
+    }
+
+    private void removeIfImplicitlyProven(ICell cell, List<ICell> redundantCells){
+        cell.invertColor();
+        try{
+            addLayer();         //fails if the cell is redundant
+            cell.invertColor();
+            remove(redundantCells);
+        } catch (WorldCreationException e){
+            redundantCells.add(cell);
+            remove(redundantCells);
+        }
+    }
+
+
+    public boolean isCompleted(){
+        for (int row = 0; row < size; row++){
+            for (int col = 0; col < size; col++){
+                if (!cellAt(row, col).equals(completeWorld[row][col]))
+                    return false;
+            }
+        }
+        return true;
     }
 
     public void nextState(Position position){

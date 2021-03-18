@@ -12,4 +12,5 @@ public interface ICell {
     @Override
     boolean equals(Object c);
     void invertColor();
+    Cell copy();
 }

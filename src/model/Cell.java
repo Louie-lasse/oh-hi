@@ -72,4 +72,8 @@ public class Cell implements ICell{
     public void invertColor(){
         state = state.inverse();
     }
+
+    public Cell copy(){
+        return new Cell(state);
+    }
 }

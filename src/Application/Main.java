@@ -10,8 +10,10 @@ import static java.lang.System.out;
 public class Main {
     public static void main(String[] args) {
         IModel model = new OriginalModel();
-        model.createWorld(10);
-        displayWorld(model.getWorld());
+        for (int i=0; i < 3; i++) {
+            model.createWorld(10);
+            displayWorld(model.getWorld());
+        }
     }
 
     public static void displayWorld(ICell[][] world){
