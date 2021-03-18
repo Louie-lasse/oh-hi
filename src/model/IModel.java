@@ -6,4 +6,5 @@ public interface IModel {
     void nextState(Position position);
     boolean isCompleted();
     ICell[][] getWorld();
+    void setDifficulty(Difficulty difficulty);
 }

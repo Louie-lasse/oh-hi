@@ -27,9 +27,16 @@ public class OriginalModel implements IModel{
 
     private static final Random random = new Random();
 
+    private static Difficulty difficulty;
+
+    public void setDifficulty(Difficulty d){
+        difficulty = d;
+    }
+
     public void createWorld(int size) throws IllegalWorldSizeException, WorldCreationException {
         if (size%2!=0) throw new IllegalWorldSizeException(size);
         this.size = size;
+        if (difficulty == null) difficulty = Difficulty.NORMAL;
         world = new Cell[size][size];
         fillWorldWithColoredCells();
         saveCompleteWorld();
@@ -178,7 +185,7 @@ public class OriginalModel implements IModel{
 
     private void removeRedundantCells(){
         //TODO can create irrational worlds. Don't know how or why. MAYBE one time error
-        //FIXME check if the world is complete before call. In that case, it's probably a inverColor() whats wack
+        //FIXME check if the world is complete before call. In that case, it's probably a invertColor() whats wack
         ICell[] cellsToCheck = randomize(getWorldAsArray());
         List<ICell> redundantCells = new ArrayList<>();
         for (ICell cell: cellsToCheck){
@@ -203,15 +210,21 @@ public class OriginalModel implements IModel{
     }
 
     private void removeIfProven(ICell cell, List<ICell> redundantCells){
-        //FIXME refractor out method removeIfExplcitlyProven
+        if (!removeIfExplicitlyProven(cell, redundantCells)){
+            if (difficulty == Difficulty.HARD){
+                removeIfImplicitlyProven(cell, redundantCells);
+            }
+        }
+    }
+
+    private boolean removeIfExplicitlyProven(ICell cell, List<ICell> redundantCells){
         cell.invertColor();
-        if (anyCellIsInvalid()){    //if cell is explicitly needed
+        if (anyCellIsInvalid()) {    //if cell is explicitly needed
             remove(cell);
             redundantCells.add(cell);
-        } else {                    //if cell is implicitly needed
-            cell.invertColor();
-            removeIfImplicitlyProven(cell, redundantCells);
+            return true;
         }
+        return false;
     }
 
     private boolean anyCellIsInvalid(){

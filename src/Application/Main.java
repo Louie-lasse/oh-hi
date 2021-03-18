@@ -1,15 +1,13 @@
 package Application;
 
-import model.ICell;
-import model.IModel;
-import model.OriginalModel;
-import model.State;
+import model.*;
 
 import static java.lang.System.out;
 
 public class Main {
     public static void main(String[] args) {
         IModel model = new OriginalModel();
+        model.setDifficulty(Difficulty.HARD);
         for (int i=0; i < 3; i++) {
             model.createWorld(10);
             displayWorld(model.getWorld());
