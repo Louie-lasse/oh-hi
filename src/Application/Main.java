@@ -8,7 +8,7 @@ public class Main {
     public static void main(String[] args) {
         IModel model = new OriginalModel();
         model.setDifficulty(Difficulty.HARD);
-        for (int i=0; i < 3; i++) {
+        for (int i=0; i < 30; i++) {
             model.createWorld(10);
             displayWorld(model.getWorld());
         }

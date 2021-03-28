@@ -20,9 +20,7 @@ public class OriginalModel implements IModel{
         return world;
     }
 
-    private static final Random random = new Random();
-
-    private static Difficulty difficulty;
+    private static Difficulty difficulty = Difficulty.NORMAL;
 
     public void setDifficulty(Difficulty d){
         difficulty = d;
@@ -31,7 +29,6 @@ public class OriginalModel implements IModel{
     public void createWorld(int size) throws IllegalWorldSizeException, WorldCreationException {
         if (size%2!=0) throw new IllegalWorldSizeException(size);
         this.size = size;
-        if (difficulty == null) difficulty = Difficulty.NORMAL;
         world = new Cell[size][size];
         fillWorldWithColoredCells();
         saveCompleteWorld();
@@ -97,17 +94,26 @@ public class OriginalModel implements IModel{
     }
 
     private ICell getRandomEmptyCellFromWorld(){
-        int randomRow;
-        int randomColumn;
-        do{
-            randomRow = random.nextInt(size);
-            randomColumn = random.nextInt(size);
-        } while (cellAt(randomRow, randomColumn).isFilled());
-        return cellAt(randomRow, randomColumn);
+        List<ICell> emptyCells = getEmptyCellsFromWorld();
+        return ModelHelper.randomCell(emptyCells);
+    }
+
+    private List<ICell> getEmptyCellsFromWorld(){
+        List<ICell> emptyCells = new ArrayList<>();
+        for (ICell[] row: world){
+            for (ICell cell: row){
+                if (cell.isEmpty()){
+                    emptyCells.add(cell);
+                }
+            }
+        }
+        return emptyCells;
     }
 
     void saveCompleteWorld(){
         completeWorld = new ICell[size][size];
+        //TODO replace with PositionIterator?
+
         for (int row = 0; row < size; row++){
             saveRowInWorld(row);
         }
@@ -122,6 +128,7 @@ public class OriginalModel implements IModel{
     boolean fillAndGetProvenCells(List<ICell> filledCells){
         Proof proof;
         ICell cell;
+        //TODO please try to replace with PositionIterator
         for (int row = 0; row < size; row++){
             for (int col = 0; col < size; col++) {
                 cell = world[row][col];
@@ -145,7 +152,7 @@ public class OriginalModel implements IModel{
 
     private void removeRedundantCells(){
         ICell[] cellsToCheck = getWorldAsArray();
-        randomize(cellsToCheck);
+        ModelHelper.randomize(cellsToCheck);
         List<ICell> redundantCells = new ArrayList<>();
         for (ICell cell: cellsToCheck){
             removeIfProven(cell, redundantCells);
@@ -153,29 +160,15 @@ public class OriginalModel implements IModel{
     }
 
     private ICell[] getWorldAsArray(){
+        //TODO replace with PositionIterator
         ICell[] worldAsArray = new ICell[size*size];
         int index = 0;
         for (int row = 0; row < size; row++){
-            for(int column = 0; column < size; column++){
+            for (int column = 0; column < size; column++){
                 worldAsArray[index++] = cellAt(row, column);
             }
         }
         return worldAsArray;
-    }
-
-    private void randomize(ICell[] cells){
-        int size = cells.length;
-        int randomIndex;
-        for (int i = 0; i < size; i++){
-            randomIndex = random.nextInt(size);
-            swap(cells, i, randomIndex);
-        }
-    }
-
-    private void swap(ICell[] cells, int oldIndex, int newIndex){
-        ICell tmp = cells[oldIndex];
-        cells[oldIndex] = cells[newIndex];
-        cells[newIndex] = tmp;
     }
 
     private void removeIfProven(ICell cell, List<ICell> redundantCells){
@@ -197,6 +190,7 @@ public class OriginalModel implements IModel{
     }
 
     private boolean anyCellIsInvalid(){
+        //TODO replace with PositionIterator
         for (int row = 0; row < size; row++){
             for (int col = 0; col < size; col++){
                 if (!getProof(row, col).isValid()) return true;
@@ -219,6 +213,7 @@ public class OriginalModel implements IModel{
 
 
     public boolean isCompleted(){
+        //TODO replace with PositionIterator
         for (int row = 0; row < size; row++){
             for (int col = 0; col < size; col++){
                 if (!cellAt(row, col).equals(completeWorld[row][col]))
@@ -248,6 +243,10 @@ public class OriginalModel implements IModel{
         proof.add(provableBySameAmountInLine(row, column));
         proof.add(provableByNoSamePattern(row, column));
         return proof;
+    }
+
+    private Proof getProof(Position p){
+        return getProof(p.row, p.column);
     }
 
     private Proof provableByThreeInARow(int row, int column){
@@ -434,6 +433,70 @@ public class OriginalModel implements IModel{
             return NONE;
         }
         return colorB.getState();
+    }
+
+    public Position help() throws HelpNotAvalibleException{
+        try{
+            return anyCellIsWrong();
+        } catch (HelpNotAvalibleException helpNotAvalibleException){
+            return findTip();
+        }
+    }
+
+    private Position anyCellIsWrong() throws HelpNotAvalibleException{
+        PositionIterator worldIterator = new PositionIterator(size);
+        Position position;
+        while (worldIterator.hasNext()){
+            position = worldIterator.getNext();
+            if (isIncorrect(position))
+                return position;
+        }
+        throw new HelpNotAvalibleException();
+    }
+
+    private boolean isIncorrect(Position position){
+        if (cellAt(position).isEmpty()) return false;
+        return cellAt(position).equals(completeWorld[position.row][position.column]);
+    }
+
+    private Position findTip() throws HelpNotAvalibleException{
+        try{
+            return findSimpleTip();
+        } catch (HelpNotAvalibleException helpNotAvalibleException){
+            return findComplexTip();
+        }
+    }
+
+    private Position findSimpleTip() throws HelpNotAvalibleException{
+        List<Position> emptyCellsPosition = getEmptyCellsPosition();
+        ModelHelper.randomize(emptyCellsPosition);
+        for (Position position: emptyCellsPosition){
+            if (isProven(position)) return position;
+        }
+        throw new HelpNotAvalibleException();
+    }
+
+    private List<Position> getEmptyCellsPosition(){
+        List<Position> positions = new ArrayList<>();
+        Position position;
+        PositionIterator iterator = new PositionIterator(size);
+        while (iterator.hasNext()){
+            position = iterator.getNext();
+            if (cellAt(position).isEmpty())
+                positions.add(position);
+        }
+        return positions;
+    }
+
+    private boolean isProven(Position p){
+        return getProof(p).isColored();
+    }
+
+    private Position findComplexTip() throws HelpNotAvalibleException{
+        //TODO write this. Find all empty cells and iterate the following:
+        //if randomColor then fillAllProven crashes for at least one color, it is proven by simple proof
+        //can't crash for both, as that would imply an incorrect cell, caught by anyCellIsWrong()
+        throw new HelpNotAvalibleException();
     }
 
 }
