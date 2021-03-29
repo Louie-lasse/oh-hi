@@ -23,6 +23,11 @@ public class PositionIterator {
         return position;
     }
 
+    void reset(){
+        row = 0;
+        col = 0;
+    }
+
     private void increasePosition(){
         row++;
         if (row == size){
