@@ -223,7 +223,6 @@ public class OriginalModel implements IModel{
     }
 
     private Proof getProof(int row, int column){
-        //TODO remove and refactor by making provableBy[...] accept (Position position)
         Proof proof = new Proof();
         proof.add(provableByThreeInARow(row, column));
         proof.add(provableBySameAmountInLine(row, column));
@@ -421,16 +420,16 @@ public class OriginalModel implements IModel{
         return colorB.getState();
     }
 
-    public Position help() throws HelpNotAvalibleException{
+    public Position help() throws HelpNotAvailableException {
         //TODO not tested. Needs gui and runtime to test
         try{
             return anyCellIsWrong();
-        } catch (HelpNotAvalibleException helpNotAvalibleException){
+        } catch (HelpNotAvailableException helpNotAvailableException){
             return findTip();
         }
     }
 
-    private Position anyCellIsWrong() throws HelpNotAvalibleException{
+    private Position anyCellIsWrong() throws HelpNotAvailableException {
         PositionIterator worldIterator = new PositionIterator(size);
         Position position;
         while (worldIterator.hasNext()){
@@ -438,7 +437,7 @@ public class OriginalModel implements IModel{
             if (isIncorrect(position))
                 return position;
         }
-        throw new HelpNotAvalibleException();
+        throw new HelpNotAvailableException();
     }
 
     private boolean isIncorrect(Position position){
@@ -446,21 +445,21 @@ public class OriginalModel implements IModel{
         return cellAt(position).equals(completeWorld[position.row][position.column]);
     }
 
-    private Position findTip() throws HelpNotAvalibleException{
+    private Position findTip() throws HelpNotAvailableException {
         try{
             return findSimpleTip();
-        } catch (HelpNotAvalibleException helpNotAvalibleException){
+        } catch (HelpNotAvailableException helpNotAvailableException){
             return findComplexTip();
         }
     }
 
-    private Position findSimpleTip() throws HelpNotAvalibleException{
+    private Position findSimpleTip() throws HelpNotAvailableException {
         List<Position> emptyCellsPosition = getEmptyCellsPosition();
         ModelHelper.randomize(emptyCellsPosition);
         for (Position position: emptyCellsPosition){
             if (isProven(position)) return position;
         }
-        throw new HelpNotAvalibleException();
+        throw new HelpNotAvailableException();
     }
 
     private List<Position> getEmptyCellsPosition(){
@@ -479,13 +478,13 @@ public class OriginalModel implements IModel{
         return getProof(p).isColored();
     }
 
-    private Position findComplexTip() throws HelpNotAvalibleException{
+    private Position findComplexTip() throws HelpNotAvailableException {
         List<Position> emptyCellPositions = getEmptyCellsPosition();
         for (Position position: emptyCellPositions){
             if (isComplexTipAvailableAt(position))
                 return position;
         }
-        throw new HelpNotAvalibleException();
+        throw new HelpNotAvailableException();
     }
 
     private boolean isComplexTipAvailableAt(Position position){

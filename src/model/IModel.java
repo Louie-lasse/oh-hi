@@ -6,5 +6,5 @@ public interface IModel {
     void nextState(Position position);
     boolean isCompleted();
     ICell[][] getWorld();
-    Position help() throws HelpNotAvalibleException;
+    Position help() throws HelpNotAvailableException;
 }
