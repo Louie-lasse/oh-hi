@@ -20,12 +20,6 @@ public class OriginalModel implements IModel{
         return world;
     }
 
-    private static Difficulty difficulty = Difficulty.NORMAL;
-
-    public void setDifficulty(Difficulty d){
-        difficulty = d;
-    }
-
     public void createWorld(int size) throws IllegalWorldSizeException, WorldCreationException {
         if (size%2!=0) throw new IllegalWorldSizeException(size);
         this.size = size;
@@ -167,9 +161,7 @@ public class OriginalModel implements IModel{
 
     private void removeIfProven(ICell cell, List<ICell> redundantCells){
         if (!removeIfExplicitlyProven(cell, redundantCells)){
-            if (difficulty == Difficulty.HARD){
-                removeIfImplicitlyProven(cell, redundantCells);
-            }
+            removeIfImplicitlyProven(cell, redundantCells);
         }
     }
 
