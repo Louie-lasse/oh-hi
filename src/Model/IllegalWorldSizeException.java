@@ -1,4 +1,4 @@
-package model;
+package Model;
 
 public class IllegalWorldSizeException extends IllegalArgumentException{
     IllegalWorldSizeException(int size){

@@ -1,12 +1,13 @@
 package Application;
 
-import model.*;
+import Model.*;
 
 import static java.lang.System.out;
 
 public class Main {
     public static void main(String[] args) {
         IModel model = new OriginalModel();
+        model.createWorld(4);
     }
 
     public static void displayWorld(ICell[][] world){

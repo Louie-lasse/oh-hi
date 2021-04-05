@@ -1,4 +1,4 @@
-package model;
+package Model;
 
 
 
@@ -7,32 +7,32 @@ public class PositionIterator {
     private int row;
     private int col;
 
-    PositionIterator(int size){
+    public PositionIterator(int size){
         this.size = size;
         row = 0;
         col = 0;
     }
 
-    boolean hasNext(){
-        return (row < size || col < size);
+    public boolean hasNext(){
+        return (row < size);
     }
 
-    Position getNext(){
+    public Position getNext(){
         Position position = new Position(row, col);
         increasePosition();
         return position;
     }
 
-    void reset(){
+    public void reset(){
         row = 0;
         col = 0;
     }
 
     private void increasePosition(){
-        row++;
-        if (row == size){
-            row = 0;
-            col++;
+        col++;
+        if (col == size){
+            col = 0;
+            row++;
         }
     }
 }

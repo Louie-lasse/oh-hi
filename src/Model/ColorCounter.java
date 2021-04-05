@@ -1,4 +1,4 @@
-package model;
+package Model;
 
 class ColorCounter {
     private int blueAmount = 0;

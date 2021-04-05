@@ -1,4 +1,4 @@
-package model;
+package Model;
 
 public interface IModel {
     void update();
@@ -7,4 +7,6 @@ public interface IModel {
     boolean isCompleted();
     ICell[][] getWorld();
     Position help() throws HelpNotAvailableException;
+    int getSize();
+    State getColor(Position position);
 }

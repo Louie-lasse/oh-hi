@@ -1,8 +1,8 @@
-package model;
+package Model;
 
 import java.util.*;
 
-import static model.State.*;
+import static Model.State.*;
 
 public class OriginalModel implements IModel{
 
@@ -18,6 +18,12 @@ public class OriginalModel implements IModel{
 
     public ICell[][] getWorld(){
         return world;
+    }
+
+    public int getSize(){ return size; }
+
+    public State getColor(Position position){
+        return cellAt(position).getState();
     }
 
     public void createWorld(int size) throws IllegalWorldSizeException, WorldCreationException {
