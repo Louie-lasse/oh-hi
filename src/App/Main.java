@@ -1,4 +1,4 @@
-package Application;
+package App;
 
 import Model.*;
 
@@ -8,6 +8,7 @@ public class Main {
     public static void main(String[] args) {
         IModel model = new OriginalModel();
         model.createWorld(4);
+        displayWorld(model.getWorld());
     }
 
     public static void displayWorld(ICell[][] world){

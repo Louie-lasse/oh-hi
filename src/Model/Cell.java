@@ -3,6 +3,7 @@ package Model;
 import java.util.Random;
 
 public class Cell implements ICell{
+    private boolean locked = false;
     private State state;
     private static final Random random = new Random();
 
@@ -15,10 +16,11 @@ public class Cell implements ICell{
     }
 
     public void nextState(){
+        if (locked) return;
         switch (state.ordinal()) {
             case (0) -> setState(State.RED);
             case (1) -> setState(State.BLUE);
-            case (3) -> makeEmpty();
+            case (2) -> makeEmpty();
         }
     }
 
@@ -75,5 +77,13 @@ public class Cell implements ICell{
 
     public Cell copy(){
         return new Cell(state);
+    }
+
+    public void lock(){
+        locked = true;
+    }
+
+    public boolean isLocked(){
+        return locked;
     }
 }

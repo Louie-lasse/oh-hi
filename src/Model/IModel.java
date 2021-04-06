@@ -9,4 +9,5 @@ public interface IModel {
     Position help() throws HelpNotAvailableException;
     int getSize();
     State getColor(Position position);
+    boolean isLocked(Position position);
 }

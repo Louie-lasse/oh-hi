@@ -13,4 +13,6 @@ public interface ICell {
     boolean equals(Object c);
     void invertColor();
     Cell copy();
+    void lock();
+    boolean isLocked();
 }

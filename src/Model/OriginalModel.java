@@ -26,6 +26,8 @@ public class OriginalModel implements IModel{
         return cellAt(position).getState();
     }
 
+    public boolean isLocked(Position position){ return cellAt(position).isLocked(); }
+
     public void createWorld(int size) throws IllegalWorldSizeException, WorldCreationException {
         if (size%2!=0) throw new IllegalWorldSizeException(size);
         this.size = size;
@@ -33,6 +35,7 @@ public class OriginalModel implements IModel{
         fillWorldWithColoredCells();
         saveCompleteWorld();
         removeRedundantCells();
+        lockColoredCells();
     }
 
     private void fillWorldWithColoredCells() throws WorldCreationException {
@@ -203,6 +206,17 @@ public class OriginalModel implements IModel{
         }
     }
 
+
+    void lockColoredCells(){
+        PositionIterator iterator = new PositionIterator(size);
+        ICell cell;
+        while (iterator.hasNext()){
+            cell = cellAt(iterator.getNext());
+            if (cell.isFilled()){
+                cell.lock();
+            }
+        }
+    }
 
     public boolean isCompleted(){
         PositionIterator positions = new PositionIterator(size);
