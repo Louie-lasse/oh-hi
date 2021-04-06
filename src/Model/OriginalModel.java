@@ -181,6 +181,7 @@ public class OriginalModel implements IModel{
             redundantCells.add(cell);
             return true;
         }
+        cell.invertColor();
         return false;
     }
 
@@ -239,7 +240,7 @@ public class OriginalModel implements IModel{
     }
 
     private ICell cellInCompleteWorld(Position position){
-        return world[position.row][position.column];
+        return completeWorld[position.row][position.column];
     }
 
     private Proof getProof(int row, int column){
