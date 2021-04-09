@@ -9,4 +9,12 @@ public class Position {
         this.row = row;
         this.column = column;
     }
+
+    @Override
+    public boolean equals(Object o){
+        if (o == this) return true;
+        if (!(o instanceof Position)) return false;
+        Position position = (Position) o;
+        return (position.row == row && position.column == column);
+    }
 }

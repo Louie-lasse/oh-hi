@@ -224,6 +224,17 @@ public class OriginalModel implements IModel{
         Position p;
         while (positions.hasNext()){
             p = positions.getNext();
+            if (!cellAt(p).isEmpty())
+                return false;
+        }
+        return true;
+    }
+
+    public boolean isCorrect(){
+        PositionIterator positions = new PositionIterator(size);
+        Position p;
+        while (positions.hasNext()){
+            p = positions.getNext();
             if (!cellAt(p).equals(cellInCompleteWorld(p)))
                 return false;
         }
@@ -463,7 +474,7 @@ public class OriginalModel implements IModel{
 
     private boolean isIncorrect(Position position){
         if (cellAt(position).isEmpty()) return false;
-        return cellAt(position).equals(completeWorld[position.row][position.column]);
+        return !cellAt(position).equals(completeWorld[position.row][position.column]);
     }
 
     private Position findTip() throws HelpNotAvailableException {

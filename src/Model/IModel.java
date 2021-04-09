@@ -5,6 +5,7 @@ public interface IModel {
     void createWorld(int size) throws IllegalWorldSizeException;
     void nextState(Position position);
     boolean isCompleted();
+    boolean isCorrect();
     ICell[][] getWorld();
     Position help() throws HelpNotAvailableException;
     int getSize();
