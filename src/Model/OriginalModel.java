@@ -453,7 +453,6 @@ public class OriginalModel implements IModel{
     }
 
     public Position help() throws HelpNotAvailableException {
-        //TODO not tested. Needs gui and runtime to test
         try{
             return anyCellIsWrong();
         } catch (HelpNotAvailableException helpNotAvailableException){
