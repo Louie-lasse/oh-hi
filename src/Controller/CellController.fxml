@@ -7,14 +7,17 @@
 
 <fx:root fx:id="cellPane" prefHeight="100.0" prefWidth="100.0" style="-fx-background-color: #505050;" type="javafx.scene.layout.AnchorPane" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <ImageView fx:id="lockImage" fitHeight="50.0" fitWidth="50.0" onMouseClicked="#onClick" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="25.0" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="25.0" AnchorPane.topAnchor="25.0">
-         <image>
-            <Image url="@../App/resources/lock1.jpg" />
-         </image>
-      </ImageView>
       <AnchorPane fx:id="colorPane" onMouseClicked="#onClick" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
          <cursor>
             <Cursor fx:constant="HAND" />
          </cursor></AnchorPane>
+      <ImageView fx:id="lockImage" fitHeight="50.0" fitWidth="50.0" onMouseClicked="#onClick" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.bottomAnchor="25.0" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="25.0" AnchorPane.topAnchor="25.0">
+         <image>
+            <Image url="@../App/resources/lock1.jpg" />
+         </image>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </ImageView>
    </children>
 </fx:root>

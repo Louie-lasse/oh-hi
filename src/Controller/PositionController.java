@@ -16,8 +16,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PositionController extends AnchorPane {
-    static private IModel sharedModel;
+    private static IModel sharedModel;
     public static void setWorld(IModel model){ sharedModel = model; }
+    private static IView parent;
+    public static void setView(IView view){ parent = view; }
 
     private static boolean lockIsToggled = false;
     private static final String red = "-fx-background-color:  #C24A31";
@@ -26,9 +28,6 @@ public class PositionController extends AnchorPane {
     private static final String gray = "-fx-background-color:  #A0A0A0";
     private static final String background = "-fx-background-color:  #505050";
 
-    private static final List<PositionController> siblings = new ArrayList<>();
-    //TODO refactor siblings to parent to make controller fit MVC (slim controller)
-    //TODO refactor lockToggle to parent, as it's a view element (and not slim controller)
     //TODO get nicer lock image
 
     private final Position position;
@@ -48,71 +47,47 @@ public class PositionController extends AnchorPane {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("CellController.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
-
         try {
             fxmlLoader.load();
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
-
         updateColor();
-        siblings.add(this);
-    }
-
-    public static void clear(){
-        siblings.clear();
     }
 
     @FXML
     void onClick(MouseEvent event) {
-        if (sharedModel.isLocked(position)) toggleAllLocks();
-        else {
-            sharedModel.nextState(position);
-            updateColor();
-            clearLooks();
-        }
+        sharedModel.nextState(position);
+        updateColor();
+        parent.cellActionPerformed(position);
     }
 
-    private static void toggleAllLocks(){
-        lockIsToggled = !lockIsToggled;
-        for (PositionController positionController: siblings){
-            positionController.toggleLock();
-        }
-    }
-
-    public static void clearLooks(){
+    public void clearLooks(){
         clearHelp();
+    }
+
+    public boolean isAt(Position position){
+        return (this.position.equals(position));
     }
     
-    private static void clearHelp(){
-        for (PositionController positionController: siblings)
-            positionController.clearBorder();
+    private void clearHelp(){
+        clearBorder();
     }
 
-    public static void help(Position position){
-        clearHelp();
-        for (PositionController controller: siblings){
-            if (controller.position.equals(position)){
-                controller.displayHelp();
-                break;
-            }
-        }
-    }
-
-    private void displayHelp(){
+    public void displayHelp(){
         colorBorder();
     }
 
-    private void toggleLock(){
-        if (!sharedModel.isLocked(position)) return;
-        if(lockIsToggled){
-            lockImage.toFront();
-        } else {
-            lockImage.toBack();
-        }
+    public static void toggleLock(){
+        lockIsToggled = !lockIsToggled;
     }
 
-    private void updateColor(){
+    public void displayLock(){
+        if (!sharedModel.isLocked(position)) return;
+        lockImage.setVisible(lockIsToggled);
+    }
+
+    public void updateColor(){
         setColor(sharedModel.getColor(position));
     }
 

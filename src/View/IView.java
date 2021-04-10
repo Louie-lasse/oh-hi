@@ -1,7 +1,7 @@
 package View;
 
-import Model.IModel;
+import Model.Position;
 
 public interface IView {
-    void cellActionPerformed();
+    void cellActionPerformed(Position position);
 }

@@ -12,13 +12,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.RowConstraints;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class ViewFirst extends Application implements Initializable, IView{
@@ -26,6 +26,8 @@ public class ViewFirst extends Application implements Initializable, IView{
     public static void main(String[] args){ launch(args); }
 
     IModel model = new OriginalModel();
+
+    private final List<PositionController> children = new ArrayList<>();
 
     @FXML
     private AnchorPane window;
@@ -58,9 +60,10 @@ public class ViewFirst extends Application implements Initializable, IView{
     @Override
     public void initialize(URL url, ResourceBundle rb){
         PositionController.setWorld(model);
+        PositionController.setView(this);
     }
 
-    private static int x = 4;
+    private int x = 4;
 
     @FXML
     void buttonPressed(ActionEvent event) {
@@ -73,15 +76,18 @@ public class ViewFirst extends Application implements Initializable, IView{
     public void createGrid(int size) throws IllegalWorldSizeException {
         model.createWorld(size);
         cellGrid.getChildren().clear();
-        PositionController.clear();
+        this.children.clear();
         //TODO fix constraints. Alternatively, just do it statically
         PositionIterator iterator = new PositionIterator(size);
-        Position position;
         while (iterator.hasNext()){
-            position = iterator.getNext();
-            cellGrid.add(new PositionController(position), position.column, position.row);
+            addController(iterator.getNext());
         }
-        //cellGrid.autosize();
+    }
+
+    private void addController(Position position){
+        PositionController newController = new PositionController(position);
+        children.add(newController);
+        cellGrid.add(newController, position.column, position.row);
     }
 
     @FXML
@@ -101,14 +107,39 @@ public class ViewFirst extends Application implements Initializable, IView{
     void getHelp(MouseEvent event) {
         try{
             Position helpPosition = model.help();
-            PositionController.help(helpPosition);
+            displayHelp(helpPosition);
         } catch (HelpNotAvailableException h){
 
         }
     }
 
-    public void cellActionPerformed(){
-        PositionController.clearLooks();
+    private void displayHelp(Position position){
+        for (PositionController child: children){
+            child.clearLooks();
+            if (child.isAt(position)){
+                child.displayHelp();
+            }
+        }
+    }
+
+    public void cellActionPerformed(Position position){
+        if (model.isLocked(position)) toggleAllLocks();
+        else {
+            clearLooks();
+        }
+    }
+
+    private void toggleAllLocks(){
+        PositionController.toggleLock();
+        for (PositionController positionController: children){
+            positionController.displayLock();
+        }
+    }
+
+    private void clearLooks(){
+        for (PositionController child: children){
+            child.clearLooks();
+        }
     }
 
 }
