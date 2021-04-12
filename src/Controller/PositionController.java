@@ -12,8 +12,6 @@ import javafx.scene.layout.AnchorPane;
 
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class PositionController extends AnchorPane {
     private static IModel sharedModel;
@@ -27,8 +25,6 @@ public class PositionController extends AnchorPane {
     private static final String blank = "-fx-background-color:  #707070";
     private static final String gray = "-fx-background-color:  #A0A0A0";
     private static final String background = "-fx-background-color:  #505050";
-
-    //TODO get nicer lock image
 
     private final Position position;
 

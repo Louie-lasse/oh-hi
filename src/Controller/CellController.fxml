@@ -13,7 +13,7 @@
          </cursor></AnchorPane>
       <ImageView fx:id="lockImage" fitHeight="50.0" fitWidth="50.0" onMouseClicked="#onClick" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.bottomAnchor="25.0" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="25.0" AnchorPane.topAnchor="25.0">
          <image>
-            <Image url="@../App/resources/lock1.jpg" />
+            <Image url="@../App/resources/lock_trans.png" />
          </image>
          <cursor>
             <Cursor fx:constant="HAND" />
